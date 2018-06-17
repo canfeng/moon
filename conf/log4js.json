@@ -1,0 +1,26 @@
+{
+  "appenders": {
+    "wallet-log": {
+      "type": "dateFile",
+      "filename": "/data/log/bari/bari.log",
+      "pattern": "-yyyy-MM-dd",
+      "alwaysIncludePattern": true,
+      "maxLogSize": 100000000,
+      "compress": false,
+      "encoding": "utf-8",
+      "keepFileExt": true
+    },
+    "wallet-console": {
+      "type": "stdout"
+    }
+  },
+  "categories": {
+    "default": {
+      "appenders": [
+        "wallet-log",
+        "wallet-console"
+      ],
+      "level": "info"
+    }
+  }
+}

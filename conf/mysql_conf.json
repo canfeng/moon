@@ -1,0 +1,17 @@
+{
+  "run_env":"qa",
+  "qa": {
+    "host": "172.16.50.131",
+    "user": "qa-mal_kf",
+    "password": "qa-mal_kf",
+    "database": "bari",
+    "port": "3306"
+  },
+  "dev": {
+    "host": "172.16.50.113",
+    "user": "mysql",
+    "password": "123456",
+    "database": "bari",
+    "port": "3306"
+  }
+}

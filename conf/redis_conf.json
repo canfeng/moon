@@ -1,0 +1,41 @@
+{
+  "cluster_enable": false,
+  "cluster": [
+    {
+      "port": 7000,
+      "host": "172.16.50.131"
+    },
+    {
+      "port": 7001,
+      "host": "172.16.50.131"
+    },
+    {
+      "port": 7002,
+      "host": "172.16.50.131"
+    },
+    {
+      "port": 7003,
+      "host": "172.16.50.131"
+    },
+    {
+      "port": 7004,
+      "host": "172.16.50.131"
+    },
+    {
+      "port": 7005,
+      "host": "172.16.50.131"
+    }
+  ],
+  "options": {
+    "redisOptions": {
+      "password": "fffjjj",
+      "db": 0
+    }
+  },
+  "default_options": {
+    "port": 6379,
+    "host": "172.16.50.131",
+    "password": "123456",
+    "db": 0
+  }
+}
