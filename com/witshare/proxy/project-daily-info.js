@@ -1,4 +1,4 @@
-const dbManager = require('../proxy/db-manager');
+const dbManager = require('./db-manager');
 const Sequelize = require('sequelize');
 const moment = require('moment');
 
@@ -64,4 +64,6 @@ const ProjectDailyInfo = dbManager.define('project_daily_info', {
     },
 });
 
-module.exports = ProjectDailyInfo;
+module.exports = {
+    MODEL:ProjectDailyInfo,
+};

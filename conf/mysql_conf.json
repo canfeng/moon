@@ -1,5 +1,5 @@
 {
-  "run_env":"qa",
+  "run_env":"dev",
   "qa": {
     "host": "172.16.50.131",
     "user": "qa-mal_kf",
@@ -8,10 +8,10 @@
     "port": "3306"
   },
   "dev": {
-    "host": "172.16.50.113",
+    "host": "localhost",
     "user": "mysql",
     "password": "123456",
-    "database": "bari",
+    "database": "mars",
     "port": "3306"
   }
 }

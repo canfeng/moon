@@ -1,4 +1,4 @@
-const dbManager = require('../proxy/db-manager');
+const dbManager = require('./db-manager');
 const Sequelize = require('sequelize');
 const moment = require('moment');
 
@@ -42,4 +42,16 @@ const SysUser = dbManager.define('sys_user', {
     },
 });
 
-module.exports = SysUser;
+const findByUserGid = async function (userGid) {
+    let one = await SysUser.findOne({
+        where: {
+            userGidL: userGid
+        }
+    });
+    return one ? one.get() : null;
+};
+
+module.exports = {
+    MODEL: SysUser,
+    findByUserGid: findByUserGid
+};

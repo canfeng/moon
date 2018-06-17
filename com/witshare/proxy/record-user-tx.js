@@ -1,4 +1,4 @@
-const dbManager = require('../proxy/db-manager');
+const dbManager = require('./db-manager');
 const Sequelize = require('sequelize');
 const moment = require('moment');
 
@@ -92,4 +92,6 @@ const RecordUserTx = dbManager.define('record_user_tx', {
     },
 });
 
-module.exports = RecordUserTx;
+module.exports = {
+    MODEL:RecordUserTx,
+};
