@@ -31,7 +31,6 @@
     "node-fetch": "^2.1.1",
     "node-schedule": "^1.3.0",
     "qingstor-sdk": "2.2.10",
-    "redis-connection-pool": "^1.6.1",
     "request": "^2.85.0",
     "sequelize": "^4.37.2",
     "serve-favicon": "~2.4.5",

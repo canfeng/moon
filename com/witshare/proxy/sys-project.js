@@ -28,6 +28,10 @@ const SysProject = dbManager.define('sys_project', {
         field: 'project_token',
         type: Sequelize.STRING
     },
+    tokenAddress: {
+        field: 'token_address',
+        type: Sequelize.STRING
+    },
     platformAddress: {
         field: 'platform_address',
         type: Sequelize.STRING
