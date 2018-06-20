@@ -52,8 +52,8 @@ const RecordUserTx = dbManager.define('record_user_tx', {
         field: 'pay_amount',
         type: Sequelize.DECIMAL
     },
-    price: {
-        field: 'price',
+    priceRate: {
+        field: 'price_rate',
         type: Sequelize.DECIMAL
     },
     hopeGetAmount: {
@@ -92,6 +92,49 @@ const RecordUserTx = dbManager.define('record_user_tx', {
     },
 });
 
+const findByUserTxStatus = async function (status) {
+    let list = await RecordUserTx.findAll({
+        where: {
+            userTxStatus: status
+        }
+    });
+    if (list) {
+        for (let i = 0, l = list.length; i < l; i++) {
+            list[i] = list[i].get();
+        }
+    }
+    return list;
+};
+
+const findByUserTxStatusAndProjectGid = async function (status, projectGid) {
+    let list = await RecordUserTx.findAll({
+        where: {
+            userTxStatus: status,
+            projectGid: projectGid
+        }
+    });
+    if (list) {
+        for (let i = 0, l = list.length; i < l; i++) {
+            list[i] = list[i].get();
+        }
+    }
+    return list;
+};
+
+const updateUserTxStatus = async function (payTx, status) {
+    return await RecordUserTx.update({
+        userTxStatus: status,
+        updateTime: new Date(),
+    }, {
+        where: {
+            payTx: payTx
+        }
+    });
+};
+
 module.exports = {
-    MODEL:RecordUserTx,
+    MODEL: RecordUserTx,
+    findByUserTxStatus: findByUserTxStatus,
+    updateUserTxStatus: updateUserTxStatus,
+    findByUserTxStatusAndProjectGid: findByUserTxStatusAndProjectGid
 };

@@ -1,28 +1,7 @@
 {
   "redis_key": {
-    "user_token_prefix_key": "ibs:turin:userBaseInfo:",
-    "user_device_number_key": "ibs:turin:userLoginDevice:",
-    "token_key": "ibs:bari:cache:token:",
-    "token_address_find_by_id_key": "ibs:bari:tokenAddress:id_",
-    "token_price_key": "ibs:bari:db:tokenPrice:",
-    "token_decimal_key": "ibs:bari:db:decimal:",
-    "transfer_token_key": "ibs:bari:db:transferToken:",
-    "sms_valid_code_key": "ibs:bari:db:sms:validCode:",
-    "user_pwd_continuous_error_times_key": "ibs:bari:db:userPwdContinuousErrorTimes:",
-    "user_transfer_times_key": "ibs:bari:db:userTransferTimes:",
-    "global_config_key": "ibs:bari:db:globalConfig",
-    "user_frequent_request_times_key": "ibs:bari:db:userFrequentRequestTimes:",
-    "address_set_key": "ibs:bari:db:allEthAddressSet",
-    "transfer_token_used_times_key": "ibs:bari:db:transferTokenUsedTimes:",
-    "turin_add_assets_pubsub": "ibs:turin_bari:db:listener:addAssets",
-    "turin_add_assets_queue": "ibs:turin_bari:db:bariPopList",
-    "locked_user_list_key": "ibs:bari:db:hash:lockedUsers:",
-    "wallet_total_assets_stat_key": "ibs:bari:db:sorted_set:walletTotalAssetsStat",
-    "token_total_hold_stat_key": "ibs:bari:db:hash:tokenTotalHoldStat",
-    "wallet_address_last_tx_nonce": "ibs:bari:db:walletAddressLastTxNonce:",
-    "wallet_address_and_user_phone_mismatch_num_key": "ibs:bari:db:walletAddressAndUserPhoneMismatchNum:",
-    "user_transfer_call_times_key": "ibs:bari:db:userTransferCallTimes:",
-    "user_transfer_call_failed_times_key": "ibs:bari:db:userTransferCallFailedTimes:"
+    "wallet_v3_json": "witshare:moon:walletV3Json:",
+    "wallet_address_last_nonce": "witshare:moon:walletAddressLastNonce:"
   },
   "request_header": {
     "user_token": "userToken",
@@ -48,10 +27,7 @@
     "ios_mask_img_enable": 1
   },
   "normal_config": {
-    "task_cron_stat_wallet_total_assets": "0 0 1 * * *",
-    "task_cron_stat_token_total_hold": "0 0 2 * * *",
-    "available_status_of_ios_mask_img": 0,
-    "available_status_of_main_business_api": 1
+    "task_cron_check_user_pay_tx_validity": "0 0 1 * * *"
   },
   "alarm_type": {
     "LOCKED_USER_NUM": {

@@ -64,12 +64,12 @@ const SysProject = dbManager.define('sys_project', {
             return moment(this.getDataValue('endTime')).format('YYYY-MM-DD HH:mm:ss')
         }
     },
-    startPrice: {
-        field: 'start_price',
+    startPriceRate: {
+        field: 'start_price_rate',
         type: Sequelize.DECIMAL
     },
-    endPrice: {
-        field: 'end_price',
+    endPriceRate: {
+        field: 'start_price_rate',
         type: Sequelize.DECIMAL
     },
     projectStatus: {

@@ -340,7 +340,7 @@ var INTERNAL_REFRESH;
 
 /**
  * https://m.feixiaohao.com/
- * syn usd and cny price by feixiaohao net
+ * syn usd and cny priceRate by feixiaohao net
  * @param pageIndex : page index
  */
 var refreshTokenPriceByfxhao = function(pageIndex, list) {

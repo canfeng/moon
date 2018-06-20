@@ -28,6 +28,10 @@ const SysUser = dbManager.define('sys_user', {
         field: 'user_status',
         type: Sequelize.INTEGER
     },
+    getTokenAddress: {
+        field: 'get_token_address',
+        type: Sequelize.STRING
+    },
     createTime: {
         field: 'create_time',
         type: Sequelize.DATE, get() {

@@ -19,5 +19,12 @@ module.exports = {
         SUCCESS: 1,
         FAIL: 2,
         DISCARD: 3
+    },
+    UserTxStatus: {
+        INIT: 0,
+        SUCCESS: 1,
+        AMOUNT_MISMATCH: 2,
+        FAIL_TX_NOT_EXIST: 3,
+        FAIL_TX_FAILED: 4
     }
 };

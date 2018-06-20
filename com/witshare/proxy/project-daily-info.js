@@ -28,8 +28,8 @@ const ProjectDailyInfo = dbManager.define('project_daily_info', {
         field: 'project_token',
         type: Sequelize.STRING
     },
-    price: {
-        field: 'price',
+    priceRate: {
+        field: 'price_rate',
         type: Sequelize.DECIMAL
     },
     getEthAmount: {
@@ -40,21 +40,29 @@ const ProjectDailyInfo = dbManager.define('project_daily_info', {
         field: 'actual_get_eth_amount',
         type: Sequelize.DECIMAL
     },
-    distributeAmount: {
-        field: 'distribute_amount',
+    payTokenAmount: {
+        field: 'pay_token_amount',
         type: Sequelize.DECIMAL
     },
-    actualDistributeAmount: {
-        field: 'actual_distribute_amount',
+    actualPayTokenAmount: {
+        field: 'actual_pay_token_amount',
         type: Sequelize.DECIMAL
     },
-    txUserAmount: {
-        field: 'tx_user_amount',
-        type: Sequelize.DECIMAL
+    txUserCount: {
+        field: 'tx_user_count',
+        type: Sequelize.INTEGER
     },
-    actualTxUserAmount: {
-        field: 'actual_tx_user_amount',
-        type: Sequelize.DECIMAL
+    actualTxUserCount: {
+        field: 'actual_tx_user_count',
+        type: Sequelize.INTEGER
+    },
+    txAddressCount: {
+        field: 'tx_address_count',
+        type: Sequelize.INTEGER
+    },
+    actualTxAddressCount: {
+        field: 'actual_tx_address_count',
+        type: Sequelize.INTEGER
     },
     currentDay: {
         field: 'current_day',

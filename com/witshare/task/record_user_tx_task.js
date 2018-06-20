@@ -1,11 +1,11 @@
-const walletDao = require('../proxy/');
-const tokenDao = require('../proxy/token_dao');
-const logger = require('../logger').getLogger('statistics_task');
+const recordUserTx = require('../proxy/record-user-tx');
+const logger = require('../logger').getLogger('record_user_tx_task');
 const tokenService = require('../service/token_service');
 const redisUtil = require('../util/redis_util');
-const redisKeyManager = require('../common/redis_key_manager');
-const schedule = require('node-schedule');
+const ethersObj = require('../eth/ethers_obj');
+const commonEnum = require('../common/common_enum');
 const bigDecimal = require('js-big-decimal');
+const schedule = require('node-schedule');
 const FixedConfigJSON = require('../../../conf/fixed_config.json');
 
 /**
@@ -16,37 +16,40 @@ const FixedConfigJSON = require('../../../conf/fixed_config.json');
 const checkUserPayTxValidity = async function () {
     logger.info('*********************** checkUserPayTxValidity() START *********************');
     const start = Date.now();
-    let totalWalletCount = 0;
-    let pageIndex = 1;
-    let pageSize = 100;
-    const tokenList = await tokenDao.findAll();
-    let walletList = await walletDao.pageDistinctAddress(pageIndex, pageSize);
-    while (walletList && walletList.length > 0) {
-        totalWalletCount += walletList.length;
-        for (let wallet of walletList) {
-            try {
-                logger.info('statWalletTotalAssets() current stat wallet address[%s] start', wallet.ethAddress);
-                let totalAssets = 0;
-                //get balance
-                for (let token of tokenList) {
-                    logger.info('statWalletTotalAssets() current token[%s：%s]', token.symbol, token.address);
-                    await
-                        tokenService.getTokenPriceAndWalletAsset(token, wallet.ethAddress);
-                    totalAssets += parseFloat(token.assets);
+    //获取未校验的用户认购记录
+    let recordList = await recordUserTx.findByUserTxStatus(commonEnum.UserTxStatus.INIT);
+    if (recordList && recordList.length > 0) {
+        let updatedItem = {};
+        for (let record of recordList) {
+            let payTx = record.payTx;
+            //检查交易有效性
+            let receipt = await ethersObj.provider.getTransactionReceipt(payTx);
+            if (receipt) {
+                updatedItem.userTxStatus = receipt.status == 1 ? commonEnum.UserTxStatus.SUCCESS : commonEnum.UserTxStatus.FAIL_TX_FAILED;
+                updatedItem.actualPayAmount = ethersObj.utils.formatEther(receipt.value);
+            } else {
+                let transaction = await ethersObj.provider.getTransaction(payTx);
+                if (!transaction) {
+                    logger.info("checkUserPayTxValidity() payTx not exist");
+                    updatedItem.userTxStatus = commonEnum.UserTxStatus.FAIL_TX_NOT_EXIST;
+                } else {
+                    logger.info("checkUserPayTxValidity() payTx not mined");
                 }
-                //save to redis sorted set
-                const statAssetsKey = await redisKeyManager.getWalletTotalAssetsStatKey();
-                redisUtil.zAdd(statAssetsKey.key, wallet.ethAddress, totalAssets);
-                logger.info('statWalletTotalAssets() current stat wallet address[%s]->totalAssets[%s] end==>', wallet.ethAddress, totalAssets);
-            } catch (err) {
-                logger.error('statWalletTotalAssets() error: wallet[%s] ; error detail==>', wallet.ethAddress, err);
-                continue;
             }
+            await recordUserTx.updateUserTxStatus(payTx, commonEnum.UserTxStatus.FAIL_TX_NOT_EXIST);
         }
-        walletList = await walletDao.pageDistinctAddress(pageIndex, pageSize);
+    } else {
+        logger.info("checkUserPayTxValidity() no data");
     }
     logger.info('*********************** checkUserPayTxValidity() END *********************** ==> ' +
         'total used time=%sms;', Date.now() - start);
+};
+
+
+const scheduleCheckUserPayTxValidity = async function () {
+    schedule.scheduleJob(FixedConfigJSON.normal_config.task_cron_check_user_pay_tx_validity, function () {
+        checkUserPayTxValidity();
+    })
 };
 
 
