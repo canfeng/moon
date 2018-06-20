@@ -30,30 +30,53 @@ const tokenDistribute = async function (projectGid, password) {
         let listRecordUserTx = await RecordUserTx.findByUserTxStatusAndProjectGid(commonEnum.UserTxStatus.SUCCESS);
         if (listRecordUserTx) {
             for (let record of listRecordUserTx) {
-                let userReceiveAddress = record.getTokenAddress;
-                let value = 0;
-                let gasLimit = Config.eth.default_token_transfer_gas_used;
-                let defaultGasPrice = parseFloat(await ethersObj.provider.getGasPrice());
-                let nonce = getNonce(projectPlatFormAddress);
-                //token转账
-                ethersObj.transfer(tokenAddress, v3Json, password, projectPlatFormAddress, userReceiveAddress, value, gasLimit, defaultGasPrice, nonce, function (txHash) {
-                    if (!txHash) {
-                        return;
+                try {
+                    let userReceiveAddress = record.getTokenAddress;
+                    let value = 0;
+                    let gasLimit = Config.eth.default_token_transfer_gas_used;
+                    let defaultGasPrice = parseFloat(await ethersObj.provider.getGasPrice());
+                    let nonce = getNonce(projectPlatFormAddress);
+                    //token转账
+                    let result = await ethersObj.transfer(tokenAddress, v3Json, password, projectPlatFormAddress, userReceiveAddress, value, gasLimit, defaultGasPrice, nonce);
+                    if (!result) {
+                        logger.error("tokenDistribute() transfer error==>record.id=%s; result=%s", record.id, JSON.stringify(result));
+                        continue;
                     }
-                    //save transaction_log
-                    let transactionLog = {
-                        tokenAddress: tokenAddress,
-                        from: from,
-                        to: to,
-                        value: value,
-                        gasFee: ethersObj.utils.formatEther(bigDecimal.multiply(gasPrice, gasLimit)),
-                        message: message,
-                        txhash: txHash,
-                        gasPrice: ethersObj.utils.formatEther(gasPrice),
-                        gasLimit: gasLimit,
-                        nonce: nonce
+                    let txHash = result.hash;
+                    if (!txHash) {
+                        logger.error("tokenDistribute() transfer error==>record.id=%s; result=%s", record.id, JSON.stringify(result));
+                        continue;
+                    }
+                    let updateRecord = {
+                        id: record.id,
+                        platformTx: txHash,
+                        actualGetAmount: bigDecimal.multiply(record.actualPayAmount, record.priceRate),
                     };
-                });
+                    //更新txhash
+                    await RecordUserTx.updateRecordById(updateRecord);
+
+                    //等待交易结果
+                    ethersObj.refreshTxStatus(txHash).then(async function (transaction) {
+                        //get receipt for gasUsed
+                        const txReceipt = await ethersObj.provider.getTransactionReceipt(transaction.hash);
+                        const gasFee = ethersObj.utils.formatEther(ethersObj.utils.bigNumberify(transaction.gasPrice).mul(txReceipt.gasUsed));
+                        //get block for timestamp
+                        const block = await ethersObj.provider.getBlock(transaction.blockNumber);
+                        updateRecord = {
+                            distributionTime: block.timestamp,
+                            platformTxStatus: txReceipt.status == 1 ? 1 : 2,
+                            ethFee: gasFee
+                        };
+                        //update tx status
+                        await RecordUserTx.updateRecordById(updateRecord);
+                    }).catch(function (err) {
+                        logger.error("tokenDistribute() refreshTxStatus error==>txHash=%s; ", txHash, err);
+                    });
+
+                } catch (err) {
+                    logger.error("tokenDistribute() transfer error==>record.id=%s; ", record.id, err);
+                    continue;
+                }
             }
         } else {
             logger.warn('tokenDistribute() no record_user_tx for this project==>projectGid=%s', projectGid);

@@ -1,10 +1,7 @@
 const recordUserTx = require('../proxy/record-user-tx');
 const logger = require('../logger').getLogger('record_user_tx_task');
-const tokenService = require('../service/token_service');
-const redisUtil = require('../util/redis_util');
 const ethersObj = require('../eth/ethers_obj');
 const commonEnum = require('../common/common_enum');
-const bigDecimal = require('js-big-decimal');
 const schedule = require('node-schedule');
 const FixedConfigJSON = require('../../../conf/fixed_config.json');
 
@@ -21,6 +18,7 @@ const checkUserPayTxValidity = async function () {
     if (recordList && recordList.length > 0) {
         let updatedItem = {};
         for (let record of recordList) {
+            updatedItem.id = record.id;
             let payTx = record.payTx;
             //检查交易有效性
             let receipt = await ethersObj.provider.getTransactionReceipt(payTx);
@@ -36,7 +34,7 @@ const checkUserPayTxValidity = async function () {
                     logger.info("checkUserPayTxValidity() payTx not mined");
                 }
             }
-            await recordUserTx.updateUserTxStatus(payTx, commonEnum.UserTxStatus.FAIL_TX_NOT_EXIST);
+            await recordUserTx.updateRecordById(updatedItem);
         }
     } else {
         logger.info("checkUserPayTxValidity() no data");

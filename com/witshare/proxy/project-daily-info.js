@@ -20,6 +20,10 @@ const ProjectDailyInfo = dbManager.define('project_daily_info', {
             return moment(this.getDataValue('updateTime')).format('YYYY-MM-DD HH:mm:ss')
         }
     },
+    payTxId: {
+        field: 'pay_tx_id',
+        type: Sequelize.STRING
+    },
     projectGid: {
         field: 'project_gid',
         type: Sequelize.STRING

@@ -2,7 +2,7 @@ const dbManager = require('./db-manager');
 const Sequelize = require('sequelize');
 const moment = require('moment');
 
-const SysUser = dbManager.define('sys_user', {
+const SysUserAddress = dbManager.define('sys_user_address', {
     id: {
         type: Sequelize.INTEGER.UNSIGNED,
         primaryKey: true,
@@ -24,34 +24,39 @@ const SysUser = dbManager.define('sys_user', {
         field: 'user_gid',
         type: Sequelize.STRING
     },
+    projectGid: {
+        field: 'project_gid',
+        type: Sequelize.STRING
+    },
     email: {
         field: 'email',
         type: Sequelize.STRING
     },
-    nickname: {
-        field: 'nickname',
+    projectToken: {
+        field: 'project_token',
         type: Sequelize.STRING
     },
-    projectNum: {
-        field: 'project_num',
-        type: Sequelize.INTEGER
+    payEthAddress: {
+        field: 'pay_eth_address',
+        type: Sequelize.STRING
     },
-    userStatus: {
-        field: 'user_status',
-        type: Sequelize.INTEGER
+    getTokenAddress: {
+        field: 'get_token_address',
+        type: Sequelize.STRING
     },
 });
 
-const findByUserGid = async function (userGid) {
-    let one = await SysUser.findOne({
+const findByUserGidAndProjectGid = async function (userGid, projectGid) {
+    let one = await SysUserAddress.findOne({
         where: {
-            userGidL: userGid
+            userGidL: userGid,
+            projectGid: projectGid
         }
     });
     return one ? one.get() : null;
 };
 
 module.exports = {
-    MODEL: SysUser,
-    findByUserGid: findByUserGid
+    MODEL: SysUserAddress,
+    findByUserGidAndProjectGid: findByUserGidAndProjectGid
 };

@@ -121,7 +121,7 @@ const findByUserTxStatusAndProjectGid = async function (status, projectGid) {
     return list;
 };
 
-const updateUserTxStatus = async function (payTx, status) {
+const updateUserTxStatusByPayTx = async function (payTx, status) {
     return await RecordUserTx.update({
         userTxStatus: status,
         updateTime: new Date(),
@@ -132,9 +132,36 @@ const updateUserTxStatus = async function (payTx, status) {
     });
 };
 
+const updateRecordById = async function (record) {
+    let updateItem = {
+        updateTime: new Date()
+    };
+    if (record.actualGetAmount) {
+        updateItem.actualGetAmount = record.actualGetAmount;
+    }
+    if (record.platformTx) {
+        updateItem.platformTx = record.platformTx;
+    }
+    if (record.platformTxStatus) {
+        updateItem.platformTxStatus = record.platformTxStatus;
+    }
+    if (record.ethFee) {
+        updateItem.ethFee = record.ethFee;
+    }
+    if (record.distributionTime) {
+        updateItem.distributionTime = record.distributionTime;
+    }
+    return await RecordUserTx.update(updateItem, {
+        where: {
+            id: record.id
+        }
+    });
+};
+
 module.exports = {
     MODEL: RecordUserTx,
     findByUserTxStatus: findByUserTxStatus,
-    updateUserTxStatus: updateUserTxStatus,
-    findByUserTxStatusAndProjectGid: findByUserTxStatusAndProjectGid
+    updateUserTxStatusByPayTx: updateUserTxStatusByPayTx,
+    findByUserTxStatusAndProjectGid: findByUserTxStatusAndProjectGid,
+    updateRecordById: updateRecordById
 };

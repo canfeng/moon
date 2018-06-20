@@ -294,9 +294,8 @@ var estimateTokenTransferGas = async function (tokenAddress, from, to, value) {
  * @param gasPrice
  * @param nonce
  * @param callback
- * @returns {Promise<void>}
  */
-var transfer = async function (contractAddress, v3Json, password, from, to, value, gasLimit, gasPrice, nonce, callback) {
+var transfer = async function (contractAddress, v3Json, password, from, to, value, gasLimit, gasPrice, nonce) {
     var wallet = walletCache.getWalletByGenerateKey(from);
     if (!wallet) {
         wallet = await getWalletFromV3Json(v3Json, password);
@@ -309,12 +308,10 @@ var transfer = async function (contractAddress, v3Json, password, from, to, valu
     logger.info("transaction generate : {contractAddress:%s, from:%s, to:%s, value:%s, " +
         "gasLimit:%s, gasPrice:%s, nonce:%s}", contractAddress, from, to, value, gasLimit, gasPrice, nonce);
     if (contractAddress == '0x0') {
-        transferEther(wallet, gasPrice, from, to, nonce, value, callback);
+        return await transferEther(wallet, gasPrice, from, to, nonce, value);
+    } else {
+        return await transferToken(contractAddress, wallet, gasPrice, from, to, value, gasLimit, nonce);
     }
-    else {
-        transferToken(contractAddress, wallet, gasPrice, from, to, value, gasLimit, nonce, callback);
-    }
-
 };
 
 /**
@@ -345,65 +342,66 @@ var transferToken = async function (contractAddress, wallet, gasPrice, from, to,
     if (estimateGas) {
         transaction.gasLimit = estimateGas;
     }
-    provider.sendTransaction(wallet.sign(transaction)).then(function (hash) {
-        logger.info("transferToken hash : ", hash);
-        funcName(hash);
-    }).catch(function (err) {
-        logger.error("transferToken error transaction : ", JSON.stringify(transaction));
-        logger.error("transferToken error detail : ", err);
-        if (err) {
-            var errorMsg;
-            if (err.responseText) {
-                const rpcRes = JSON.parse(err.responseText);
-                if (rpcRes.error) {
-                    errorMsg = rpcRes.error.message;
-                }
-            }
-            funcName(undefined, errorMsg);
-        }
-        else {
-            funcName(undefined);
-        }
-    });
+    return await sendRawTransaction(transaction, wallet);
 };
 
-var transferEther = async function (wallet, gasPrice, from, to, nonce, val, funcName) {
+/**
+ *
+ * @param wallet
+ * @param gasPrice
+ * @param from
+ * @param to
+ * @param nonce
+ * @param value
+ * @param funcName
+ * @returns {Promise<*>}
+ */
+var transferEther = async function (wallet, gasPrice, from, to, nonce, value) {
     // check to address format.
     var prefixSplitArray = /0x/.exec(to);
     var fieldAmountArray = /[0-9a-zA-Z]{42}/.exec(to);
     if (!prefixSplitArray && !fieldAmountArray) {
-        funcName(undefined);
-        return;
+        return null;
     }
     var transaction = {
         to: to,
         gasPrice: gasPrice,
         gasLimit: configJson.eth.default_eth_transfer_gas_used,
         nonce: nonce,
-        value: parseFloat(val),
+        value: parseFloat(value),
         chainId: chainId
     };
+    return await sendRawTransaction(transaction, wallet);
+};
+
+/**
+ *
+ * @param transaction
+ * @param wallet
+ * @returns {Promise<{hash: null, errorMsg: null}>}
+ */
+const sendRawTransaction = async function (transaction, wallet) {
     var signedTransaction = wallet.sign(transaction);
-    provider.sendTransaction(signedTransaction).then(function (hash) {
-        funcName(hash);
-    }).catch(function (err) {
-        logger.error("transferToken error transaction : ", JSON.stringify(transaction));
-        logger.error("transferToken error detail : ", err);
+    let res = {
+        hash: null,
+        errorMsg: null
+    };
+    try {
+        res.hash = await provider.sendTransaction(signedTransaction);
+    } catch (err) {
+        logger.error("sendRawTransaction error==>transaction=%s; ", JSON.stringify(transaction), err);
         if (err) {
-            var errorMsg;
             if (err.responseText) {
                 const rpcRes = JSON.parse(err.responseText);
                 if (rpcRes.error) {
-                    errorMsg = rpcRes.error.message;
+                    res.errorMsg = rpcRes.error.message;
                 }
             }
-            funcName(undefined, errorMsg);
         }
-        else {
-            funcName(undefined);
-        }
-    });
-};
+    }
+    return res;
+}
+
 
 var listTxpage = function (pageIndex, pageSize, address, isRecursion, funcName) {
     var listUrl = ApiEtherScanUrl + "api?module=account&action=txlist&address=" +
@@ -445,10 +443,9 @@ var getNonceByAddress = async function (address) {
 };
 
 var refreshTxStatus = function (transactionHash, funcName) {
-    provider.waitForTransaction(transactionHash).then(function (transaction) {
+    return provider.waitForTransaction(transactionHash).then(function (transaction) {
         logger.info('refreshTxStatus Transaction Minded : {transaction:%s, hash:%s}l', JSON.stringify(transaction),
             transaction.hash);
-        funcName(transaction);
     });
 };
 
