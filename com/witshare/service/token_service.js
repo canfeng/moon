@@ -283,7 +283,7 @@ const validateTransferTokenAndGetTransferData = async function (userPhone, trans
         if (transferTokenUsedTimes == 1) {//确保transferToken只能使用一次
             redisUtil.expire(transferTokenUsedTimesKeyInfo.key, transferTokenUsedTimesKeyInfo.expire);
             return {
-                RES_CODE: RES_CODE.SUCCESS,
+                RES_CODE: RES_CODE.CONFIRMED,
                 transferData: JSON.parse(transferSubmitData)
             };
         } else {
@@ -393,7 +393,7 @@ const tokenTransfer = async function (userPhone, transferData) {
                         timeStamp: block.timestamp,
                         blockNum: transaction.blockNumber,
                         txhash: transaction.hash,
-                        status: txReceipt.status == 1 ? commonEnum.TX_STATUS.SUCCESS : commonEnum.TX_STATUS.FAIL,
+                        status: txReceipt.status == 1 ? commonEnum.TX_STATUS.CONFIRMED : commonEnum.TX_STATUS.FAIL,
                         gasFee: gasFee,
                         gasUsed: txReceipt.gasUsed
                     };

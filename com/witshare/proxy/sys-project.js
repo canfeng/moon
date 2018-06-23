@@ -1,6 +1,7 @@
 const dbManager = require('./db-manager');
 const Sequelize = require('sequelize');
 const moment = require('moment');
+const commonUtil = require('../util/common_util');
 
 const SysProject = dbManager.define('sys_project', {
     id: {
@@ -88,7 +89,8 @@ const findByProjectGid = async function (projectGid) {
     return one ? one.get() : null;
 };
 
+
 module.exports = {
     MODEL: SysProject,
-    findByProjectGid: findByProjectGid
+    findByProjectGid: findByProjectGid,
 }

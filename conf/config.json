@@ -4,24 +4,6 @@
     "wallet_address_cipher": "hzqxy1r4nzozjk6i",
     "turin_cipher": "ibeesaas_turin_bari"
   },
-  "redis_key": {
-    "user_token_prefix_key": "ibs:turin:userBaseInfo:",
-    "user_device_number_key": "ibs:turin:userLoginDevice:",
-    "token_key": "ibs:bari:cache:token:",
-    "token_address_find_by_id_key": "ibs:bari:tokenAddress:id_",
-    "token_price_key": "ibs:bari:db:tokenPrice:",
-    "token_decimal_key": "ibs:bari:db:decimal:",
-    "transfer_token_key": "ibs:bari:db:transferToken:",
-    "sms_valid_code_key": "ibs:bari:db:sms:validCode:",
-    "user_pwd_continuous_error_times_key": "ibs:bari:db:userPwdContinuousErrorTimes:",
-    "user_transfer_times_key": "ibs:bari:db:userTransferTimes:",
-    "global_config_key": "ibs:bari:db:globalConfig",
-    "user_frequent_request_times_key": "ibs:bari:db:userFrequentRequestTimes:",
-    "address_set_key": "ibs:bari:db:allEthAddressSet",
-    "transfer_token_used_times_key": "ibs:bari:db:transferTokenUsedTimes:",
-    "turin_add_assets_pubsub": "ibs:turin_bari:db:listener:addAssets",
-    "turin_add_assets_queue": "ibs:turin_bari:db:bariPopList"
-  },
   "request_header": {
     "user_token": "userToken",
     "device_number": "userLoginDevice",
@@ -47,29 +29,13 @@
     "gas_price_unit": "gwei",
     "explorerUrl": "https://ropsten.etherscan.io/"
   },
-  "qingstor": {
-    "access_key_id": "ZIDPNLOMBEVPDQYTQIQE",
-    "secret_access_key": "vR6lBvYLNnWpiVe0JM8McUHgZy0COlh7oESNRL1a",
-    "host": "qingstor.com",
-    "port": "443",
-    "protocol": "https",
-    "connection_retries": "3",
-    "bucket": "rmbdembucket",
-    "img_dir_path": "*****"
-  },
-  "jpush": {
-    "app_key": "b04f7e6b76259c8eaa6cea99",
-    "master_secret": "9add3a511fdae8c3f814d9c9",
-    "type": "1"
-  },
   "ibeesaas": {
-    "bari": {
-      "name": "bari",
+    "moon": {
+      "name": "moon",
       "version": "v2",
-      "header": "X-IbeeAuth-Token",
+      "header": "X-Witshare-Token",
       "ak_sk": {
-        "WhrYARmqcP8diwZHnl0q1XUqmVKfx9yZ": "",
-        "nki3TGAVyoibZQfqFgdVDxntCsXpi6Ih": ""
+        "WhrYARmqcP8diwZHnl0q1XUqmVKfx9yZ": "B588c6e6Be674bBcB84040728c7e7CB6"
       }
     },
     "sms": {
@@ -83,31 +49,6 @@
       "template": {
         "verify": "验证码{0}，15分钟内有效，请勿泄漏给他人！"
       }
-    },
-    "sms_alarm": {
-      "version": "v2",
-      "biz_type": "ibs_support",
-      "host": "https://qa-taotie.ibeesaas.com/lasvegas_api",
-      "url": "/smognode01/v4/gateway/submit",
-      "ak": "78b9eDA7A7574D5B8C7D60cF80786Dd8",
-      "sk": "B588c6e6Be674bBcB84040728c7e7CB6",
-      "header": "X-WeshareAuth-Token",
-      "template": {
-        "notify_alarm": "蜂巢钱包预警 -> 预警项：{0}，报警阈值：{1}，当前值：{2}，补充<{3}>！"
-      }
-    },
-    "global_config": {
-      "expire_transfer_token": 180,
-      "expire_sms_valid_code": 900,
-      "expire_user_pwd_continuous_error_times": 86400,
-      "expire_user_transfer_times": 86400,
-      "expire_user_frequent_request_times": 60,
-      "expire_transfer_token_used_times": 150,
-      "upper_limit_user_wallet_count": 10,
-      "upper_limit_user_pwd_continuous_error_times": 5,
-      "upper_limit_user_transfer_times": 20,
-      "upper_limit_user_frequent_request_times": 100,
-      "ios_mask_img_enable": 1
     }
   }
 }

@@ -37,7 +37,7 @@ module.exports = function (req, res, next) {
         // const allParams = Object.assign(req.query, req.params);
         bodyJson = JSON.stringify(req.body);
     }
-    if (!ibeesaasAuthUtil.verifyToken(authToken, urlPath, req.method, queryParams, bodyJson, ConfigJSON.ibeesaas.bari)) {
+    if (!ibeesaasAuthUtil.verifyToken(authToken, urlPath, req.method, queryParams, bodyJson, ConfigJSON.ibeesaas.moon)) {
         res.jsonp(responseUtil.error(RES_CODE.SIGNATURE_AUTH_TOKEN_ERROR));
         return;
     }

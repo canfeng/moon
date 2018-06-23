@@ -46,17 +46,15 @@ const SysUserAddress = dbManager.define('sys_user_address', {
     },
 });
 
-const findByUserGidAndProjectGid = async function (userGid, projectGid) {
-    let one = await SysUserAddress.findOne({
-        where: {
-            userGidL: userGid,
-            projectGid: projectGid
-        }
-    });
-    return one ? one.get() : null;
-};
-
 module.exports = {
     MODEL: SysUserAddress,
-    findByUserGidAndProjectGid: findByUserGidAndProjectGid
+    findByUserGidAndProjectGid: async function (userGid, projectGid) {
+        let one = await SysUserAddress.findOne({
+            where: {
+                userGidL: userGid,
+                projectGid: projectGid
+            }
+        });
+        return one ? one.get() : null;
+    }
 };

@@ -1,6 +1,7 @@
 const dbManager = require('./db-manager');
 const Sequelize = require('sequelize');
 const moment = require('moment');
+const CommonEnum = require('../common/common_enum');
 
 const RecordUserTx = dbManager.define('record_user_tx', {
     id: {
@@ -19,6 +20,10 @@ const RecordUserTx = dbManager.define('record_user_tx', {
         type: Sequelize.DATE, get() {
             return moment(this.getDataValue('updateTime')).format('YYYY-MM-DD HH:mm:ss')
         }
+    },
+    payTxId: {
+        field: 'pay_tx_id',
+        type: Sequelize.STRING
     },
     userGid: {
         field: 'user_gid',
@@ -58,6 +63,10 @@ const RecordUserTx = dbManager.define('record_user_tx', {
     },
     hopeGetAmount: {
         field: 'hope_get_amount',
+        type: Sequelize.BIGINT
+    },
+    shouldGetAmount: {
+        field: 'should_get_amount',
         type: Sequelize.BIGINT
     },
     actualPayAmount: {
@@ -106,33 +115,39 @@ const findByUserTxStatus = async function (status) {
     return list;
 };
 
-const findByUserTxStatusAndProjectGid = async function (status, projectGid) {
-    let list = await RecordUserTx.findAll({
-        where: {
-            userTxStatus: status,
-            projectGid: projectGid
-        }
+const findSuccessPayUserRecordListByProjectGid = async function (projectGid) {
+    let list = await dbManager.query("select user_gid userGid,count(1) count,sum(actual_pay_amount) totalPayAmount,sum(should_get_amount) totalShouldGetAmount from record_user_tx where user_tx_status in (?,?) and project_gid=? group by user_gid", {
+        replacements: [CommonEnum.USER_TX_STATUS.CONFIRMED, CommonEnum.USER_TX_STATUS.AMOUNT_MISMATCH, projectGid],
+        type: dbManager.QueryTypes.SELECT
     });
-    if (list) {
-        for (let i = 0, l = list.length; i < l; i++) {
-            list[i] = list[i].get();
-        }
-    }
     return list;
 };
 
-const updateUserTxStatusByPayTx = async function (payTx, status) {
+const updateUserTxStatusByPayTx = async function (record) {
+    let updateItem = {
+        updateTime: new Date()
+    };
+    if (record.actualPayAmount) {
+        updateItem.actualPayAmount = record.actualPayAmount;
+    }
+    if (record.userTxStatus) {
+        updateItem.userTxStatus = record.userTxStatus;
+    }
+    if (record.shouldGetAmount) {
+        updateItem.shouldGetAmount = record.shouldGetAmount;
+    }
     return await RecordUserTx.update({
         userTxStatus: status,
         updateTime: new Date(),
     }, {
         where: {
-            payTx: payTx
+            payTx: record.payTx
         }
     });
 };
 
-const updateRecordById = async function (record) {
+
+const updatePlatformTxDataByUserGid = async function (record) {
     let updateItem = {
         updateTime: new Date()
     };
@@ -153,7 +168,36 @@ const updateRecordById = async function (record) {
     }
     return await RecordUserTx.update(updateItem, {
         where: {
-            id: record.id
+            userGid: record.userGid,
+            userTxStatus: {
+                [dbManager.Op.in]: [CommonEnum.USER_TX_STATUS.CONFIRMED, CommonEnum.USER_TX_STATUS.AMOUNT_MISMATCH]
+            }
+        }
+    });
+};
+
+const updatePlatformTxStatusByPlatformTx = async function (record) {
+    let updateItem = {
+        updateTime: new Date()
+    };
+    if (record.actualGetAmount) {
+        updateItem.actualGetAmount = record.actualGetAmount;
+    }
+    if (record.platformTx) {
+        updateItem.platformTx = record.platformTx;
+    }
+    if (record.platformTxStatus) {
+        updateItem.platformTxStatus = record.platformTxStatus;
+    }
+    if (record.ethFee) {
+        updateItem.ethFee = record.ethFee;
+    }
+    if (record.distributionTime) {
+        updateItem.distributionTime = record.distributionTime;
+    }
+    return await RecordUserTx.update(updateItem, {
+        where: {
+            platformTx: record.platformTx,
         }
     });
 };
@@ -162,6 +206,7 @@ module.exports = {
     MODEL: RecordUserTx,
     findByUserTxStatus: findByUserTxStatus,
     updateUserTxStatusByPayTx: updateUserTxStatusByPayTx,
-    findByUserTxStatusAndProjectGid: findByUserTxStatusAndProjectGid,
-    updateRecordById: updateRecordById
+    findSuccessPayUserRecordListByProjectGid: findSuccessPayUserRecordListByProjectGid,
+    updatePlatformTxDataByUserGid: updatePlatformTxDataByUserGid,
+    updatePlatformTxStatusByPlatformTx: updatePlatformTxStatusByPlatformTx
 };

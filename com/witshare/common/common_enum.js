@@ -15,16 +15,21 @@ module.exports = {
         DELETE_WALLET: 'deleteWallet'
     },
     TX_STATUS: {
-        UN_CONFIRM: 0,
+        INIT: 0,
         SUCCESS: 1,
         FAIL: 2,
         DISCARD: 3
     },
-    UserTxStatus: {
+    USER_TX_STATUS: {
         INIT: 0,
-        SUCCESS: 1,
-        AMOUNT_MISMATCH: 2,
-        FAIL_TX_NOT_EXIST: 3,
-        FAIL_TX_FAILED: 4
+        CONFIRM_SUCCESS: 1,
+        //to地址不是平台地址
+        CONFIRM_FAIL_TO_NOT_PLATFORM: 11,
+        //from地址不匹配
+        CONFIRM_FAIL_FROM_NOT_MATCH: 12,
+        //金额不匹配
+        CONFIRM_FAIL_AMOUNT_NOT_MATCH: 13,
+        TX_FAILED: 2,
+        TX_NOT_EXIST: 3
     }
 };

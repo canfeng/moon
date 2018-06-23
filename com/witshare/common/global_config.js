@@ -10,12 +10,12 @@ const redisUtil = require('../util/redis_util');
  * @returns {Promise<void>}
  */
 const getValueByKey = async function (key) {
-    let value = await redisUtil.hget(FixedConfigJSON.redis_key.global_config_key, key);
+    let value = await redisUtil.hget(FixedConfigJSON.redis_key.global_config, key);
     if (value) {
         return value;
     }
     value = FixedConfigJSON.global_config[key];
-    redisUtil.hset(FixedConfigJSON.redis_key.global_config_key, key, value);
+    redisUtil.hset(FixedConfigJSON.redis_key.global_config, key, value);
     return value;
 };
 
@@ -29,7 +29,7 @@ const getIntValueByKey = async function (key) {
  * @returns {Promise<void>}
  */
 const initRefreshCache = async function () {
-    redisUtil.hsetAll(FixedConfigJSON.redis_key.global_config_key, FixedConfigJSON.global_config);
+    redisUtil.hsetAll(FixedConfigJSON.redis_key.global_config, FixedConfigJSON.global_config);
 };
 
 

@@ -91,7 +91,7 @@ const resendTransaction = async function (userPhone, password, txHash, gasPrice)
                             transactionLog.status = 0;
                             transactionLog.gasFee = bigDecimal.multiply(oldTransaction.gasLimit, gasPrice);
                             await transactionDao.add(transactionLog);
-                            return RES_CODE.SUCCESS;
+                            return RES_CODE.CONFIRMED;
                         } else {
                             //gasPrice太低
                             return RES_CODE.TRANSACTION_UNDER_PRICED;
@@ -108,7 +108,7 @@ const resendTransaction = async function (userPhone, password, txHash, gasPrice)
                     //已执行
                     transactionDao.updateByTxHash({
                         txhash: txHash,
-                        status: receipt.status() == 1 ? commonEnum.TX_STATUS.SUCCESS : commonEnum.TX_STATUS.FAIL
+                        status: receipt.status() == 1 ? commonEnum.TX_STATUS.CONFIRMED : commonEnum.TX_STATUS.FAIL
                     });
                     return RES_CODE.TRANSACTION_ALREADY_EXECUTE;
                 }

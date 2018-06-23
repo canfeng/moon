@@ -7,7 +7,7 @@ module.exports = async function (req, res, next) {
         `ACCEPT REQUEST==>  
 ==============================START==============================
 RequestPath     :%s
-Header          :%s
+Headers         :%s
 QueryParams     :%s
 RequestBody     :%s
 RemoteAddress   :%s

@@ -54,7 +54,7 @@ process.on('message', async function (message) {
         switch (message.operation) {
             case commonEnum.wallet_operation.CREATE_WALLET:
                 createWallet(message.data.password).then(function (walletObj) {
-                    let errCode = RES_CODE.SUCCESS;
+                    let errCode = RES_CODE.CONFIRMED;
                     if (!walletObj) {
                         errCode = RES_CODE.WALLET_CREATE_FAILED_ERROR;
                     }
@@ -63,7 +63,7 @@ process.on('message', async function (message) {
                 break;
             case commonEnum.wallet_operation.IMPORT_KEYSTORE:
                 importKeystore(message.data.v3Json, message.data.oldPassword, message.data.password).then(function (walletObj) {
-                    let errCode = RES_CODE.SUCCESS;
+                    let errCode = RES_CODE.CONFIRMED;
                     if (!walletObj) {
                         errCode = RES_CODE.KEYSTORE_OR_PASSWORD_ERROR;
                     }
@@ -72,7 +72,7 @@ process.on('message', async function (message) {
                 break;
             case commonEnum.wallet_operation.IMPORT_PRIVATE_KEY:
                 importPrivateKey(message.data.privateKey, message.data.password).then(function (walletObj) {
-                    let errCode = RES_CODE.SUCCESS;
+                    let errCode = RES_CODE.CONFIRMED;
                     if (!walletObj) {
                         errCode = RES_CODE.PRIVATE_KEY_ERROR;
                     }

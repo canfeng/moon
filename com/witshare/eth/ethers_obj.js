@@ -55,7 +55,6 @@ var walletCache = require("./wallet_cache.js");
 var https = require("https");
 var logger = require("../logger.js").getLogger('ethers_obj');
 var erc20Abi = require('../../../conf/erc20_abi.json');
-var redisTokenUtil = require('../eth/redis_token_util.js');
 
 var ContractCache = require("memory-cache");
 
@@ -151,44 +150,6 @@ var getTotalSupply = async function (contractAddress) {
     var contract = getContractInstance(contractAddress);
     var val = await contract.totalSupply();
     return utils.bigNumberify(val).toString();
-};
-
-var commonUtil = require("./common_util.js");
-
-var generateToken = async function (contractAddress, funcName) {
-    logger.debug("contractAddress >>> ", contractAddress);
-    var token = {};
-    if (contractAddress == "0x0") {
-        var usdCny = await redisTokenUtil.getTokenUsdCny(contractAddress);
-        token.logo = "/imgs/token/0x0.png";
-        token.name = "Ether";
-        token.symbol = "";
-        token.decimalVal = 18;
-        token.priceUsd = usdCny.usdPrice;
-        token.priceCny = usdCny.cnyPrice;
-        token.address = contractAddress;
-        token.transferGasUsed = await estimateTokenTransferGas(contractAddress);
-        token.chainType = 0;
-        token.type = 0;
-        logger.info("generateToken : ", token);
-        funcName(token);
-    }
-    else {
-        token.name = await getName(contractAddress);
-        token.symbol = await getSymbol(contractAddress);
-        token.decimalVal = await getDecimals(contractAddress);
-        token.transferGasUsed = await estimateTokenTransferGas(contractAddress);
-        commonUtil.initTokenUsdPrice(contractAddress, function (obj) {
-            token.priceUsd = obj.UsdPrice;
-            token.priceCny = obj.CnyPrice;
-            token.logo = obj.logo;
-            token.address = contractAddress;
-            token.chainType = 0;
-            token.type = 2;
-            logger.info("generateToken : ", token);
-            funcName(token);
-        });
-    }
 };
 
 var getRealTotalSupply = async function (contractAddress) {
@@ -480,7 +441,6 @@ const ethersObj = {
     getSymbol: getSymbol,
     getName: getName,
     getTotalSupply: getTotalSupply,
-    generateToken: generateToken,
     getRealTotalSupply: getRealTotalSupply,
     getBalance: getBalance,
     createWallet: createWallet,

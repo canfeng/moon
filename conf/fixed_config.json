@@ -1,7 +1,8 @@
 {
   "redis_key": {
-    "wallet_v3_json": "witshare:moon:walletV3Json:",
-    "wallet_address_last_nonce": "witshare:moon:walletAddressLastNonce:"
+    "wallet_v3_json": "witshare:moon:db:walletV3Json:",
+    "wallet_address_last_nonce": "witshare:moon:db:walletAddressLastNonce:",
+    "global_config": "witshare:moon:db:globalConfig"
   },
   "request_header": {
     "user_token": "userToken",
@@ -27,7 +28,9 @@
     "ios_mask_img_enable": 1
   },
   "normal_config": {
-    "task_cron_check_user_pay_tx_validity": "0 0 1 * * *"
+    "external_config_path": "/data/config/moon/",
+    "task_cron_check_user_pay_tx_validity": "0 0 1 * * *",
+    "task_cron_polling_platform_tx_status": "0 */10 * * * *"
   },
   "alarm_type": {
     "LOCKED_USER_NUM": {

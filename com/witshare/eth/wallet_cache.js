@@ -9,19 +9,13 @@ var putWallet = async function(key, wallet, expire) {
         logger.info("walletCache key %s overdue.", key);
     });
     var wallet = walletCache.get(key);
-}
-
-var getWalletByKey = function (phone, walletId, password) {
-    var key = phone + "#" + walletId + "#" + password;
-    return walletCache.get(key);
-}
+};
 
 var getWalletByGenerateKey = function (key) {
     return walletCache.get(key);
 }
 
 module.exports = {
-    getWalletByKey:getWalletByKey,
     putWallet:putWallet,
     getWalletByGenerateKey:getWalletByGenerateKey
 };
