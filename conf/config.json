@@ -1,8 +1,5 @@
 {
   "aes_cipher_key": {
-    "password_cipher": "hzqxy1r4nzozjk6i",
-    "wallet_address_cipher": "hzqxy1r4nzozjk6i",
-    "turin_cipher": "ibeesaas_turin_bari"
   },
   "request_header": {
     "user_token": "userToken",
@@ -35,19 +32,7 @@
       "version": "v2",
       "header": "X-Witshare-Token",
       "ak_sk": {
-        "WhrYARmqcP8diwZHnl0q1XUqmVKfx9yZ": "B588c6e6Be674bBcB84040728c7e7CB6"
-      }
-    },
-    "sms": {
-      "version": "v2",
-      "biz_type": "fcxq",
-      "host": "https://qa-taotie.ibeesaas.com/lasvegas_api",
-      "url": "/smognode01/v4/gateway/submit",
-      "ak": "98wp2hw678dfeddDSEWSE",
-      "sk": "sAh7EsJBqYQkG1Dyp45o9FDNsdfeSSSZp7g8yHefz11",
-      "header": "X-WeshareAuth-Token",
-      "template": {
-        "verify": "验证码{0}，15分钟内有效，请勿泄漏给他人！"
+        "c8indnclqc4tmul6qc4e1gd40b4dlt72": ""
       }
     }
   }
