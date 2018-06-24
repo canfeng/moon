@@ -15,14 +15,14 @@ const logger = require('../logger').getLogger('signature_filter');
  */
 module.exports = function (req, res, next) {
     //get auth token from
-    const authToken = req.header(ConfigJSON.ibeesaas.bari.header);
+    const authToken = req.header(ConfigJSON.ibeesaas.moon.header);
     //get body json
     let bodyJson = "";
     let queryParams = "";
     logger.info("signatureFilter()|body json==>", bodyJson);
     //concat url
     // let urlPath = '/' + ConfigJSON.ibeesaas.bari.name + req.path; TODO 0428
-    let urlPath = req.path;
+    let urlPath = req.path.replace('\/moon', '');
     const requestMethod = req.method;
     if (requestMethod == 'GET') {
         if (req.header('user-agent').indexOf('iOS') != -1) {

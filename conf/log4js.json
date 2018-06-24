@@ -2,7 +2,7 @@
   "appenders": {
     "wallet-log": {
       "type": "dateFile",
-      "filename": "/data/log/bari/bari.log",
+      "filename": "/data/log/moon/moon.log",
       "pattern": "-yyyy-MM-dd",
       "alwaysIncludePattern": true,
       "maxLogSize": 100000000,

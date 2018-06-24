@@ -88,15 +88,12 @@ const checkUserPayTxValidity = async function () {
  * @param recordUserList
  * @returns {Promise<void>}
  */
-const tokenDistribute = async function (projectGid, password, recordUserList) {
-    let project = await SysProject.findByProjectGid(projectGid);
+const tokenDistribute = async function (project, wallet, recordUserList) {
     if (project) {
         let tokenAddress = project.tokenAddress;
         let projectPlatFormAddress = project.platformAddress;
-        //获取projectPlatFormAddress的v3json
-        let redisKeyV3Json = await redisKeyManager.getKeyPlatformProjectV3Json(projectPlatFormAddress);
-        let v3Json = await redisUtil.get(redisKeyV3Json.key);
-        if (recordUserList) {
+
+        if (recordUserList && wallet) {
             for (let userRecord of recordUserList) {
                 try {
                     let userGid = userRecord.userGid;
@@ -114,7 +111,7 @@ const tokenDistribute = async function (projectGid, password, recordUserList) {
                     let defaultGasPrice = parseFloat(await ethersObj.provider.getGasPrice());
                     let nonce = getNonce(projectPlatFormAddress);
                     //token转账
-                    let result = await ethersObj.transfer(tokenAddress, v3Json, password, projectPlatFormAddress, userReceiveAddress, value, defaultTokenTransferGasLimit, defaultGasPrice, nonce);
+                    let result = await ethersObj.transferWithWallet(tokenAddress, wallet, projectPlatFormAddress, userReceiveAddress, value, defaultTokenTransferGasLimit, defaultGasPrice, nonce);
                     if (!result) {
                         logger.error("tokenDistribute() transfer error,result is null==>userGid=%s", userGid);
                         continue;
@@ -159,10 +156,10 @@ const tokenDistribute = async function (projectGid, password, recordUserList) {
                 }
             }
         } else {
-            logger.warn('tokenDistribute() no record_user_tx for this project==>projectGid=%s', projectGid);
+            logger.warn('tokenDistribute() no record_user_tx for this project==>projectGid=%s', project.projectGid);
         }
     } else {
-        logger.error("tokenDistribute() project not found==>projectGid=%s", projectGid);
+        logger.error("tokenDistribute() project not found==>projectGid=%s", project.projectGid);
     }
 };
 
@@ -332,6 +329,18 @@ const distributeProgress = async function (projectGid) {
     return result;
 };
 
+const getWalletByV3JsonAndPwd = async function (project, password) {
+    if (project) {
+        let redisKeyV3Json = await redisKeyManager.getKeyPlatformProjectV3Json(project.platformAddress);
+        let v3Json = await redisUtil.get(redisKeyV3Json.key);
+        if (v3Json) {
+            let wallet = await ethersObj.getWalletFromV3Json(v3Json, password);
+            return wallet;
+        }
+    }
+    return null;
+}
+
 
 module.exports = {
     checkUserPayTxValidity: checkUserPayTxValidity,
@@ -339,5 +348,6 @@ module.exports = {
     distributeProgress: distributeProgress,
     pollingPlatformTxStatus: pollingPlatformTxStatus,
     filterStatusArr: filterStatusArr,
-    getRecordUserListByCondition: getRecordUserListByCondition
+    getRecordUserListByCondition: getRecordUserListByCondition,
+    getWalletByV3JsonAndPwd: getWalletByV3JsonAndPwd
 }

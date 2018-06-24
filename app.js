@@ -34,7 +34,7 @@ app.use(requestFilter);
 app.use('/moon/appver', appverCtrl);
 app.use('/moon/', commonCtrl);
 
-// app.use(signatureFilter);
+app.use(signatureFilter);
 app.use('/moon/', homeCtrl);
 
 // catch 404 and forward to error handler

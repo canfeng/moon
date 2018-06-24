@@ -256,12 +256,15 @@ var estimateTokenTransferGas = async function (tokenAddress, from, to, value) {
  * @param nonce
  * @param callback
  */
-var transfer = async function (contractAddress, v3Json, password, from, to, value, gasLimit, gasPrice, nonce) {
+var transferWithPwd = async function (contractAddress, v3Json, password, from, to, value, gasLimit, gasPrice, nonce) {
     var wallet = walletCache.getWalletByGenerateKey(from);
     if (!wallet) {
         wallet = await getWalletFromV3Json(v3Json, password);
-        ethersObj.walletCache.putWallet(from, wallet, walletExpire);
+        walletCache.putWallet(from, wallet);
     }
+    return transferWithWallet(contractAddress, wallet, from, to, value, gasLimit, gasPrice, nonce);
+};
+var transferWithWallet = async function (contractAddress, wallet, from, to, value, gasLimit, gasPrice, nonce) {
     if (!nonce) {
         nonce = await getNonceByAddress(wallet.address);
     }
@@ -446,7 +449,8 @@ const ethersObj = {
     createWallet: createWallet,
     importWalletByV3Json: importWalletByV3Json,
     getWalletFromV3Json: getWalletFromV3Json,
-    transfer: transfer,
+    transferWithWallet: transferWithWallet,
+    transferWithPwd: transferWithPwd,
     transferToken: transferToken,
     transferEther: transferEther,
     listTxpage: listTxpage,
