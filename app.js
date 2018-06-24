@@ -11,8 +11,9 @@ const signatureFilter = require('./com/witshare/filter/signature_filter');
 const responseUtil = require('./com/witshare/util/response_util');
 const log4jsLogger = require('./com/witshare/logger').getLogger('app');
 
-const appverCtrl = require('./routes/appver_ctrl');
-const homeCtrl = require('./routes/home_ctrl');
+const appverCtrl = require('./routes/appver-ctrl');
+const homeCtrl = require('./routes/home-ctrl');
+const commonCtrl = require('./routes/common-ctrl');
 const recordUserTxTask = require('./com/witshare/task/record-user-tx-task');
 
 
@@ -31,8 +32,10 @@ app.use(cookieParser());
 
 app.use(requestFilter);
 app.use('/moon/appver', appverCtrl);
-app.use('/moon/', homeCtrl);
+app.use('/moon/', commonCtrl);
+
 // app.use(signatureFilter);
+app.use('/moon/', homeCtrl);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
