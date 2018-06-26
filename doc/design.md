@@ -16,32 +16,100 @@
 
 - post请求：使用json格式的字符串附在request body中传入，需要在header中指定 "Content-Type:application/json;charset=UTF-8"
 
-##分发token接口
+##打币接口
 
 - url : /token/distruibute
-
 - method：post
-
 - request body：
-
-  ```
-  {
-  	"projectGid":"123",
-  	"password":"123"
-  }
-  ```
+```
+{
+	"projectGid":"123",
+	"password":"123"
+}
+```
 
 - response body：
 
-  ```
-  {
-      "code":"0",
-      "message": "success",
-      "result": null
-  }
-  ```
+```
+{
+    "code":"0",
+    "message": "success",
+    "result": null
+}
+```
+## 获取打币进度
 
+- url : /token/distruibute/progress
+- method：get
+- request body：
 
+```
+{
+	"projectGid":"123"
+}
+```
+
+- response body：
+
+```
+{
+    "code": "0",
+    "message": "成功",
+    "result": {
+        "allCount": 2000000000,
+        "validateSuccessCount": 21000,
+        "distributeSuccessCount":0,
+        "distributeFailedCount":0,
+        "distributingCount":0,
+        "notStartCount":0
+    }
+}
+```
+
+- response desc：
+
+| 字段                   | 类型   | 说明               |
+| ---------------------- | ------ | ------------------ |
+| allCount               | number | 认购用户总数       |
+| validateSuccessCount   | number | 验证通过的用户数   |
+| distributeSuccessCount | number | 打币完成用户数     |
+| distributeFailedCount  | number | 打币中用户数       |
+| distributingCount      | number | 打币失败用户数     |
+| notStartCount          | number | 未开始打币的用户数 |
+
+## 获取当前gas价格
+
+- url : /token/distruibute/progress
+- method：get
+- request body：
+
+```
+{
+	"projectGid":"123"
+}
+```
+
+- response body：
+
+```
+{
+    "code": "0",
+    "message": "成功",
+    "result": {
+        "gasPrice": 1000000000,
+        "gasPriceGWei": "1gwei",
+        "ethGasLimit": 21000
+    }
+}
+```
+
+- response desc：
+
+| 字段         | 类型   | 说明                   |
+| ------------ | ------ | ---------------------- |
+| gasPrice     | number | 当前gasPrice，单位wei  |
+| gasPriceGWei | string | 当前gasPrice，单位gwei |
+| ethGasLimit  | number | ETH转账默认的gasLimit  |
 
 # 定时任务
 

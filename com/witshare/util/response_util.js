@@ -1,7 +1,7 @@
 const logger = require('../logger').getLogger('response_util');
 
 const build = function (RES_CODE, result) {
-    if (RES_CODE == RES_CODE.CONFIRMED) {
+    if (RES_CODE == RES_CODE.SUCCESS) {
         success(result);
     } else {
         error(RES_CODE);
@@ -13,8 +13,8 @@ const success = function (result) {
         result = null;
     }
     const response = {
-        code: RES_CODE.CONFIRMED[0],
-        message: RES_CODE.CONFIRMED[1],
+        code: RES_CODE.SUCCESS[0],
+        message: RES_CODE.SUCCESS[1],
         result: result
     };
     return response;

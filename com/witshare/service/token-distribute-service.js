@@ -85,23 +85,16 @@ const checkUserPayTxValidity = async function () {
  * token分发
  * @param projectGid
  * @param password
- * @param userTxStatus
- * @param platformTxStatus
- * @param payTxId
+ * @param recordUserList
  * @returns {Promise<void>}
  */
-const tokenDistribute = async function (projectGid, password, userTxStatusArr, platformTxStatusArr, payTxId) {
-    let project = await SysProject.findByProjectGid(projectGid);
+const tokenDistribute = async function (project, wallet, recordUserList) {
     if (project) {
         let tokenAddress = project.tokenAddress;
         let projectPlatFormAddress = project.platformAddress;
-        //获取projectPlatFormAddress的v3json
-        let redisKeyV3Json = await redisKeyManager.getKeyPlatformProjectV3Json(projectPlatFormAddress);
-        let v3Json = await redisUtil.get(redisKeyV3Json.key);
-        //获取成功打币的用户列表
-        let userList = await RecordUserTx.findSuccessPayUserRecordListByProjectGid(projectGid);
-        if (userList) {
-            for (let userRecord of userList) {
+
+        if (recordUserList && wallet) {
+            for (let userRecord of recordUserList) {
                 try {
                     let userGid = userRecord.userGid;
                     let totalPayCount = userRecord.count;
@@ -118,7 +111,7 @@ const tokenDistribute = async function (projectGid, password, userTxStatusArr, p
                     let defaultGasPrice = parseFloat(await ethersObj.provider.getGasPrice());
                     let nonce = getNonce(projectPlatFormAddress);
                     //token转账
-                    let result = await ethersObj.transfer(tokenAddress, v3Json, password, projectPlatFormAddress, userReceiveAddress, value, defaultTokenTransferGasLimit, defaultGasPrice, nonce);
+                    let result = await ethersObj.transferWithWallet(tokenAddress, wallet, projectPlatFormAddress, userReceiveAddress, value, defaultTokenTransferGasLimit, defaultGasPrice, nonce);
                     if (!result) {
                         logger.error("tokenDistribute() transfer error,result is null==>userGid=%s", userGid);
                         continue;
@@ -134,6 +127,9 @@ const tokenDistribute = async function (projectGid, password, userTxStatusArr, p
                     };
                     //更新txhash
                     await RecordUserTx.updatePlatformTxDataByUserGid(updateRecord);
+
+                    //更新nonce
+                    await updateNonce(projectPlatFormAddress, nonce);
 
                     //等待交易结果
                     ethersObj.refreshTxStatus(txHash).then(async function (transaction) {
@@ -160,10 +156,34 @@ const tokenDistribute = async function (projectGid, password, userTxStatusArr, p
                 }
             }
         } else {
-            logger.warn('tokenDistribute() no record_user_tx for this project==>projectGid=%s', projectGid);
+            logger.warn('tokenDistribute() no record_user_tx for this project==>projectGid=%s', project.projectGid);
         }
     } else {
-        logger.error("tokenDistribute() project not found==>projectGid=%s", projectGid);
+        logger.error("tokenDistribute() project not found==>projectGid=%s", project.projectGid);
+    }
+};
+
+/**
+ * 过滤传入的userTxStatus和plateformTxStatus是否有效
+ * @param userTxStatusArr
+ * @param platformTxStatusArr
+ */
+const filterStatusArr = function (userTxStatusArr, platformTxStatusArr) {
+    let OptionalUserTxStatus = [USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH];
+    let OptionalPlatformTxStatus = [TX_STATUS.INIT, TX_STATUS.FAIL, TX_STATUS.DISCARD];
+    if (userTxStatusArr && userTxStatusArr.length > 0) {
+        for (let index of userTxStatusArr) {
+            if (OptionalUserTxStatus.indexOf(userTxStatusArr[index]) === -1) {
+                userTxStatusArr.splice(index, 1);
+            }
+        }
+    }
+    if (platformTxStatusArr && platformTxStatusArr.length > 0) {
+        for (let index of platformTxStatusArr) {
+            if (OptionalPlatformTxStatus.indexOf(platformTxStatusArr[index]) === -1) {
+                platformTxStatusArr.splice(index, 1);
+            }
+        }
     }
 };
 
@@ -173,26 +193,31 @@ const tokenDistribute = async function (projectGid, password, userTxStatusArr, p
  * @param userTxStatusArr
  * @param platformTxStatusArr
  * @param payTxId
- * @returns {Promise<void>}
+ * @returns {Promise<Array<Model>>}
  */
-async function getRecordListByCondition(projectGid, userTxStatusArr, platformTxStatusArr, payTxId) {
-    let where = {
-        projectGid: projectGid
-    };
+const getRecordUserListByCondition = async function (projectGid, userTxStatusArr, platformTxStatusArr, payTxId) {
+    let userList;
     if (payTxId) {
-        where.payTxId = payTxId;
-        where.userTxStatus = {
-            [dbManager.Op.in]: [USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH]
-        };
-        where.platformTxStatus = {
-            [dbManager.Op.in]: [TX_STATUS.INIT, TX_STATUS.FAIL, TX_STATUS.DISCARD]
-        }
-    } else if (userTxStatusArr && userTxStatusArr.length > 0) {
+        userList = await dbManager.query(`select user_gid userGid,count(1) count,sum(actual_pay_amount) totalPayAmount,sum(should_get_amount) totalShouldGetAmount from record_user_tx 
+                               where pay_tx_id =? and user_tx_status in (?,?,?) and platform_tx_status in (?,?,?) group by user_gid`, {
+            replacements: [payTxId, USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH, TX_STATUS.INIT, TX_STATUS.FAIL, TX_STATUS.DISCARD],
+            type: dbManager.QueryTypes.SELECT
+        });
 
     } else if (platformTxStatusArr && platformTxStatusArr.length > 0) {
+        userList = await dbManager.query(`select user_gid userGid,count(1) count,sum(actual_pay_amount) totalPayAmount,sum(should_get_amount) totalShouldGetAmount from record_user_tx 
+                               where platform_tx_status in (?) group by user_gid`, {
+            replacements: [platformTxStatusArr.join(',')],
+            type: dbManager.QueryTypes.SELECT
+        });
 
+    } else if (userTxStatusArr && userTxStatusArr.length > 0) {
+        userList = await dbManager.query(`select user_gid userGid,count(1) count,sum(actual_pay_amount) totalPayAmount,sum(should_get_amount) totalShouldGetAmount from record_user_tx 
+                               where user_tx_status in (?) group by user_gid`, {
+            replacements: [userTxStatusArr.join(',')],
+            type: dbManager.QueryTypes.SELECT
+        });
     }
-    let userList = await RecordUserTx.findSuccessPayUserRecordListByProjectGid(projectGid);
     return userList;
 }
 
@@ -284,10 +309,10 @@ const pollingPlatformTxStatus = async function () {
 }
 
 /**
- * 获取打币总计报告
+ * 获取打币进度报告
  * @returns {Promise<void>}
  */
-const distributeSummary = async function (projectGid) {
+const distributeProgress = async function (projectGid) {
     // 认购用户总数,验证通过的用户数,已完成用户,打币中用户,打币失败用户数,未开始打币的用户数
     let result = await dbManager.query(`
         select 
@@ -304,10 +329,25 @@ const distributeSummary = async function (projectGid) {
     return result;
 };
 
+const getWalletByV3JsonAndPwd = async function (project, password) {
+    if (project) {
+        let redisKeyV3Json = await redisKeyManager.getKeyPlatformProjectV3Json(project.platformAddress);
+        let v3Json = await redisUtil.get(redisKeyV3Json.key);
+        if (v3Json) {
+            let wallet = await ethersObj.getWalletFromV3Json(v3Json, password);
+            return wallet;
+        }
+    }
+    return null;
+}
+
 
 module.exports = {
     checkUserPayTxValidity: checkUserPayTxValidity,
     tokenDistribute: tokenDistribute,
-    distributeSummary: distributeSummary,
-    pollingPlatformTxStatus: pollingPlatformTxStatus
+    distributeProgress: distributeProgress,
+    pollingPlatformTxStatus: pollingPlatformTxStatus,
+    filterStatusArr: filterStatusArr,
+    getRecordUserListByCondition: getRecordUserListByCondition,
+    getWalletByV3JsonAndPwd: getWalletByV3JsonAndPwd
 }

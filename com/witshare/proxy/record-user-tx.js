@@ -117,7 +117,7 @@ const findByUserTxStatus = async function (status) {
 
 const findSuccessPayUserRecordListByProjectGid = async function (projectGid) {
     let list = await dbManager.query("select user_gid userGid,count(1) count,sum(actual_pay_amount) totalPayAmount,sum(should_get_amount) totalShouldGetAmount from record_user_tx where user_tx_status in (?,?) and project_gid=? group by user_gid", {
-        replacements: [CommonEnum.USER_TX_STATUS.CONFIRMED, CommonEnum.USER_TX_STATUS.AMOUNT_MISMATCH, projectGid],
+        replacements: [CommonEnum.USER_TX_STATUS.CONFIRM_SUCCESS, CommonEnum.USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH, projectGid],
         type: dbManager.QueryTypes.SELECT
     });
     return list;
@@ -206,7 +206,6 @@ module.exports = {
     MODEL: RecordUserTx,
     findByUserTxStatus: findByUserTxStatus,
     updateUserTxStatusByPayTx: updateUserTxStatusByPayTx,
-    findSuccessPayUserRecordListByProjectGid: findSuccessPayUserRecordListByProjectGid,
     updatePlatformTxDataByUserGid: updatePlatformTxDataByUserGid,
     updatePlatformTxStatusByPlatformTx: updatePlatformTxStatusByPlatformTx
 };
