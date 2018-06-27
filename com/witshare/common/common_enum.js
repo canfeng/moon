@@ -29,7 +29,11 @@ module.exports = {
         CONFIRM_FAIL_FROM_NOT_MATCH: 12,
         //金额不匹配
         CONFIRM_FAIL_AMOUNT_NOT_MATCH: 13,
+        //交易失败
         TX_FAILED: 2,
-        TX_NOT_EXIST: 3
+        //交易未找到
+        TX_NOT_EXIST: 3,
+        //非法交易号
+        TX_INVALID: 4
     }
 };

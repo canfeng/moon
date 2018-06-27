@@ -23,7 +23,7 @@ const RecordUserTx = dbManager.define('record_user_tx', {
     },
     payTxId: {
         field: 'pay_tx_id',
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
     },
     userGid: {
         field: 'user_gid',
@@ -39,10 +39,6 @@ const RecordUserTx = dbManager.define('record_user_tx', {
     },
     projectToken: {
         field: 'project_token',
-        type: Sequelize.STRING
-    },
-    userAddress: {
-        field: 'user_address',
         type: Sequelize.STRING
     },
     payCoinType: {
@@ -101,18 +97,39 @@ const RecordUserTx = dbManager.define('record_user_tx', {
     },
 });
 
-const findByUserTxStatus = async function (status) {
-    let list = await RecordUserTx.findAll({
+async function findByUserPhone(phone, pageIndex, pageSize) {
+    const res = await WalletNotice.findAndCount({
+        where: {
+            userPhone: phone
+        },
+        order: [['readStatus', 'ASC'], ['id', 'DESC']],
+        limit: pageSize,
+        offset: (pageIndex - 1) * pageSize
+    });
+    for (let i = 0, l = res.rows.length; i < l; i++) {
+        res.rows[i] = res.rows[i].get();
+    }
+    return res;
+}
+
+const pageByUserTxStatus = async function (status, pageIndex, pageSize) {
+    let options = {
         where: {
             userTxStatus: status
-        }
-    });
-    if (list) {
-        for (let i = 0, l = list.length; i < l; i++) {
-            list[i] = list[i].get();
+        },
+        order: [['id', 'ASC']],
+    };
+    if (pageIndex && pageSize) {
+        options.limit = pageSize;
+        options.offset = (pageIndex - 1) * pageSize;
+    }
+    let res = await RecordUserTx.findAndCount(options);
+    if (res) {
+        for (let i = 0, l = res.rows.length; i < l; i++) {
+            res.rows[i] = res.rows[i].get();
         }
     }
-    return list;
+    return res;
 };
 
 const findSuccessPayUserRecordListByProjectGid = async function (projectGid) {
@@ -136,10 +153,7 @@ const updateUserTxStatusByPayTx = async function (record) {
     if (record.shouldGetAmount) {
         updateItem.shouldGetAmount = record.shouldGetAmount;
     }
-    return await RecordUserTx.update({
-        userTxStatus: status,
-        updateTime: new Date(),
-    }, {
+    return await RecordUserTx.update(updateItem, {
         where: {
             payTx: record.payTx
         }
@@ -204,7 +218,7 @@ const updatePlatformTxStatusByPlatformTx = async function (record) {
 
 module.exports = {
     MODEL: RecordUserTx,
-    findByUserTxStatus: findByUserTxStatus,
+    pageByUserTxStatus: pageByUserTxStatus,
     updateUserTxStatusByPayTx: updateUserTxStatusByPayTx,
     updatePlatformTxDataByUserGid: updatePlatformTxDataByUserGid,
     updatePlatformTxStatusByPlatformTx: updatePlatformTxStatusByPlatformTx

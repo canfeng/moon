@@ -45,7 +45,7 @@ const SysUser = dbManager.define('sys_user', {
 const findByUserGid = async function (userGid) {
     let one = await SysUser.findOne({
         where: {
-            userGidL: userGid
+            userGid: userGid
         }
     });
     return one ? one.get() : null;

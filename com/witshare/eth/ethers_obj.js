@@ -60,7 +60,7 @@ var ContractCache = require("memory-cache");
 
 var getContractInstance = async function (contractAddress) {
     var contract = ContractCache.get(contractAddress);
-    if (commonUtil.isNull(contract)) {
+    if (!contract) {
         contract = await new Contract(contractAddress, erc20Abi, provider);
         logger.debug("new contract : " + contract);
         ContractCache.put(contractAddress, contract);

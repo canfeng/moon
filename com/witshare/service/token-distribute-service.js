@@ -25,58 +25,70 @@ const checkUserPayTxValidity = async function () {
     logger.info('*********************** checkUserPayTxValidity() START *********************');
     const start = Date.now();
     //获取未校验的用户认购记录
-    let recordList = await RecordUserTx.findByUserTxStatus(USER_TX_STATUS.INIT);
-    if (recordList && recordList.length > 0) {
+    let pageIndex = 1;
+    let pageSize = 1000;
+    let recordList;
+    do {
+        let result = await RecordUserTx.pageByUserTxStatus(USER_TX_STATUS.INIT);
+        logger.info("checkUserPayTxValidity() total count=%s; current pageIndex=%s", result.count, pageIndex);
+        recordList = result.rows;
         let updatedItem = {};
         for (let record of recordList) {
             try {
-                updatedItem.id = record.id;
+                updatedItem = {
+                    payTx: record.payTx
+                };
                 let payTx = record.payTx;
-                //检查交易有效性
-                let receipt = await ethersObj.provider.getTransactionReceipt(payTx);
-                if (receipt) {
-                    updatedItem.actualPayAmount = ethersObj.utils.formatEther(receipt.value);
-                    if (receipt.status == 1) {
-                        //检查to和平台的收币地址是否一致
-                        let sysProject = await SysProject.findByProjectGid(record.projectGid);
-                        if (receipt.to.toLocaleLowerCase() === sysProject.platformAddress.toLocaleLowerCase()) {
-                            //检查from和用户的打币地址是否一致
-                            let sysUserAddress = await SysUserAddress.findByUserGidAndProjectGid(record.userGid, record.projectGid);
-                            if (receipt.from.toLocaleLowerCase() === sysUserAddress.payEthAddress.toLocaleLowerCase()) {
-                                //比较实际支付的金额和提交申请的金额是否一致，比较至小数点后两位数
-                                if (bigDecimal.compareTo(bigDecimal.round(updatedItem.actualPayAmount, 2), bigDecimal.round(record.payAmount, 2)) === 0) {
-                                    updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_SUCCESS;//1
+                //检查交易hash的格式
+                if (/^0x[a-fA-F0-9]{64}$/.test(payTx)) {
+                    //检查交易有效性
+                    let receipt = await ethersObj.provider.getTransactionReceipt(payTx);
+                    let transaction = await ethersObj.provider.getTransaction(payTx);
+                    if (receipt) {
+                        updatedItem.actualPayAmount = ethersObj.utils.formatEther(transaction.value);
+                        if (receipt.status == 1) {
+                            //检查to和平台的收币地址是否一致
+                            let sysProject = await SysProject.findByProjectGid(record.projectGid);
+                            if (transaction.to.toLocaleLowerCase() === sysProject.platformAddress.toLocaleLowerCase()) {
+                                //检查from和用户的打币地址是否一致
+                                let sysUserAddress = await SysUserAddress.findByUserGidAndProjectGid(record.userGid, record.projectGid);
+                                if (transaction.from.toLocaleLowerCase() === sysUserAddress.payEthAddress.toLocaleLowerCase()) {
+                                    //比较实际支付的金额和提交申请的金额是否一致，比较至小数点后两位数
+                                    if (bigDecimal.compareTo(bigDecimal.round(updatedItem.actualPayAmount, 2), bigDecimal.round(record.payAmount, 2)) === 0) {
+                                        updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_SUCCESS;//1
+                                    } else {
+                                        updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH;//13
+                                    }
                                 } else {
-                                    updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH;//13
+                                    updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH;//12
                                 }
                             } else {
-                                updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH;//12
+                                updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_TO_NOT_PLATFORM;//11
                             }
+                            //计算应该获得的token数量
+                            updatedItem.shouldGetAmount = bigDecimal.multiply(updatedItem.actualPayAmount, record.priceRate);
                         } else {
-                            updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_TO_NOT_PLATFORM;//11
+                            updatedItem.userTxStatus = USER_TX_STATUS.TX_FAILED;//2
                         }
-                        //计算应该获得的token数量
-                        updatedItem.shouldGetAmount = bigDecimal.multiply(updatedItem.actualPayAmount, record.priceRate);
                     } else {
-                        updatedItem.userTxStatus = USER_TX_STATUS.TX_FAILED;//2
+                        if (!transaction) {
+                            logger.info("checkUserPayTxValidity() payTx not exist==>payTx=%s", payTx);
+                            updatedItem.userTxStatus = USER_TX_STATUS.TX_NOT_EXIST;//3
+                        } else {
+                            logger.info("checkUserPayTxValidity() payTx not mined==>payTx=%s", payTx);
+                        }
                     }
                 } else {
-                    let transaction = await ethersObj.provider.getTransaction(payTx);
-                    if (!transaction) {
-                        logger.info("checkUserPayTxValidity() payTx not exist==>payTx=%s", payTx);
-                        updatedItem.userTxStatus = USER_TX_STATUS.TX_NOT_EXIST;//3
-                    } else {
-                        logger.info("checkUserPayTxValidity() payTx not mined==>payTx=%s", payTx);
-                    }
+                    logger.error("checkUserPayTxValidity() payTx is invalid==>payTx=%s", payTx);
+                    updatedItem.userTxStatus = USER_TX_STATUS.TX_INVALID;//4
                 }
                 await RecordUserTx.updateUserTxStatusByPayTx(updatedItem);
             } catch (err) {
                 logger.error("checkUserPayTxValidity() exception==>payTx=%s", record.payTx, err);
+                continue;
             }
         }
-    } else {
-        logger.info("checkUserPayTxValidity() no data");
-    }
+    } while (recordList && recordList.length > 0 && false);//暂时只查询一次
     logger.info('*********************** checkUserPayTxValidity() END *********************** ==> ' +
         'total used time=%sms;', Date.now() - start);
 };
@@ -100,16 +112,16 @@ const tokenDistribute = async function (project, wallet, recordUserList) {
                     let totalPayCount = userRecord.count;
                     let totalPayAmount = userRecord.totalPayAmount;
                     let totalShouldGetAmount = userRecord.totalShouldGetAmount;
-                    logger.info('tokenDistribute() current userRecord==>userGid=%; totalPayCount=%s; totalPayAmount=%s', userGid, totalPayCount, totalPayAmount);
+                    logger.info('tokenDistribute() current userRecord==>userGid=%s; totalPayCount=%s; totalPayAmount=%s; totalShouldGetAmount=%s', userGid, totalPayCount, totalPayAmount, totalShouldGetAmount);
 
                     //获取用户的收币地址
-                    let sysUserAddress = await SysUserAddress.findByUserGidAndProjectGid(userGid, projectGid);
+                    let sysUserAddress = await SysUserAddress.findByUserGidAndProjectGid(userGid, project.projectGid);
                     let userReceiveAddress = sysUserAddress.getTokenAddress;
-
+                    //TODO token decimal
                     let value = totalShouldGetAmount;
                     let defaultTokenTransferGasLimit = Config.eth.default_token_transfer_gas_used;
                     let defaultGasPrice = parseFloat(await ethersObj.provider.getGasPrice());
-                    let nonce = getNonce(projectPlatFormAddress);
+                    let nonce = await getNonce(projectPlatFormAddress);
                     //token转账
                     let result = await ethersObj.transferWithWallet(tokenAddress, wallet, projectPlatFormAddress, userReceiveAddress, value, defaultTokenTransferGasLimit, defaultGasPrice, nonce);
                     if (!result) {
@@ -172,15 +184,15 @@ const filterStatusArr = function (userTxStatusArr, platformTxStatusArr) {
     let OptionalUserTxStatus = [USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH];
     let OptionalPlatformTxStatus = [TX_STATUS.INIT, TX_STATUS.FAIL, TX_STATUS.DISCARD];
     if (userTxStatusArr && userTxStatusArr.length > 0) {
-        for (let index of userTxStatusArr) {
-            if (OptionalUserTxStatus.indexOf(userTxStatusArr[index]) === -1) {
+        for (let index in userTxStatusArr) {
+            if (!OptionalUserTxStatus.includes(userTxStatusArr[index])) {
                 userTxStatusArr.splice(index, 1);
             }
         }
     }
     if (platformTxStatusArr && platformTxStatusArr.length > 0) {
-        for (let index of platformTxStatusArr) {
-            if (OptionalPlatformTxStatus.indexOf(platformTxStatusArr[index]) === -1) {
+        for (let index in platformTxStatusArr) {
+            if (!OptionalPlatformTxStatus.includes(platformTxStatusArr[index])) {
                 platformTxStatusArr.splice(index, 1);
             }
         }
@@ -199,22 +211,22 @@ const getRecordUserListByCondition = async function (projectGid, userTxStatusArr
     let userList;
     if (payTxId) {
         userList = await dbManager.query(`select user_gid userGid,count(1) count,sum(actual_pay_amount) totalPayAmount,sum(should_get_amount) totalShouldGetAmount from record_user_tx 
-                               where pay_tx_id =? and user_tx_status in (?,?,?) and platform_tx_status in (?,?,?) group by user_gid`, {
-            replacements: [payTxId, USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH, TX_STATUS.INIT, TX_STATUS.FAIL, TX_STATUS.DISCARD],
+                               where pay_tx_id =? and project_gid=? user_tx_status in (?,?,?) and platform_tx_status in (?,?,?) group by user_gid`, {
+            replacements: [payTxId, projectGid, USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH, TX_STATUS.INIT, TX_STATUS.FAIL, TX_STATUS.DISCARD],
             type: dbManager.QueryTypes.SELECT
         });
 
     } else if (platformTxStatusArr && platformTxStatusArr.length > 0) {
         userList = await dbManager.query(`select user_gid userGid,count(1) count,sum(actual_pay_amount) totalPayAmount,sum(should_get_amount) totalShouldGetAmount from record_user_tx 
-                               where platform_tx_status in (?) group by user_gid`, {
-            replacements: [platformTxStatusArr.join(',')],
+                               where project_gid=? and platform_tx_status in (?) group by user_gid`, {
+            replacements: [projectGid, platformTxStatusArr.join(',')],
             type: dbManager.QueryTypes.SELECT
         });
 
     } else if (userTxStatusArr && userTxStatusArr.length > 0) {
         userList = await dbManager.query(`select user_gid userGid,count(1) count,sum(actual_pay_amount) totalPayAmount,sum(should_get_amount) totalShouldGetAmount from record_user_tx 
-                               where user_tx_status in (?) group by user_gid`, {
-            replacements: [userTxStatusArr.join(',')],
+                               where project_gid=? and user_tx_status in (?) group by user_gid`, {
+            replacements: [projectGid, userTxStatusArr.join(',')],
             type: dbManager.QueryTypes.SELECT
         });
     }

@@ -81,14 +81,6 @@
 
 - url : /gas/current
 - method：get
-- request body：
-
-```
-{
-	"projectGid":"123"
-}
-```
-
 - response body：
 
 ```
@@ -110,6 +102,36 @@
 | gasPrice     | number | 当前gasPrice，单位wei  |
 | gasPriceGWei | string | 当前gasPrice，单位gwei |
 | ethGasLimit  | number | ETH转账默认的gasLimit  |
+
+## 获取token的基本信息
+
+- url : /token/{address}
+- method：get
+- request parameter：
+```
+{address} => token的地址
+```
+- response body：
+
+```
+{
+    "code": "0",
+    "message": "成功",
+    "result": {
+        "name": "Bee Honey Token",
+        "symbol": "HONEY",
+        "decimal": "9"
+    }
+}
+```
+
+- response desc：
+
+| 字段         | 类型   | 说明                   |
+| ------------ | ------ | ---------------------- |
+| name         | string | token的全称  |
+| symbol         | string | token的名称 |
+| decimal  | string | token的精度  |
 
 # 定时任务
 

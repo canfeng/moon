@@ -28,7 +28,7 @@ const distributeToken = async function (req, res) {
                 if (wallet) {
                     tokenDistributeService.filterStatusArr(userTxStatusArr, platformTxStatusArr);
                     let recordUserList = await tokenDistributeService.getRecordUserListByCondition(projectGid, userTxStatusArr, platformTxStatusArr, payTxId);
-                    tokenDistributeService.tokenDistribute(project, password, recordUserList);
+                    tokenDistributeService.tokenDistribute(project, wallet, recordUserList);
                     response = responseUtil.success();
                 } else {
                     response = responseUtil.error(RES_CODE.KEYSTORE_OR_PASSWORD_ERROR);

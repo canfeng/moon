@@ -51,7 +51,7 @@ module.exports = {
     findByUserGidAndProjectGid: async function (userGid, projectGid) {
         let one = await SysUserAddress.findOne({
             where: {
-                userGidL: userGid,
+                userGid: userGid,
                 projectGid: projectGid
             }
         });
