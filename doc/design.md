@@ -18,7 +18,7 @@
 
 ##打币接口
 
-- url : /token/distruibute
+- url : /token/distribute
 - method：post
 - request body：
 ```
@@ -39,7 +39,7 @@
 ```
 ## 获取打币进度
 
-- url : /token/distruibute/progress
+- url : /token/distribute/progress
 - method：get
 - request body：
 
@@ -79,7 +79,7 @@
 
 ## 获取当前gas价格
 
-- url : /token/distruibute/progress
+- url : /gas/current
 - method：get
 - request body：
 
@@ -119,10 +119,3 @@
 
 
 
-# 核心业务逻辑
-
-## token分发流程
-
-- A. 检查条件
-1. 项目是否未完成，是否未达到硬顶
-2. 
