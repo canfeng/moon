@@ -12,8 +12,8 @@ let host = 'http://localhost:3000/moon';
 
 
 // saveKeyStore();
-testTokenInfo();
-
+// testTokenInfo();
+testTokenDistribute();
 
 async function testTokenDistribute() {
     let params = {

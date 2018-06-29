@@ -26,6 +26,12 @@ const distributeToken = async function (req, res) {
                 //check password
                 let wallet = await tokenDistributeService.getWalletByV3JsonAndPwd(project, password);
                 if (wallet) {
+                    //check decimal
+                    let tokenDecimal = await ethersObj.getDecimals(project.tokenAddress);
+                    if (tokenDecimal !== project.tokenDecimal) {
+                        logger.warn('tokenDistribute() projectToken saved tokenDecimal mismatch with real tokenDecimal==>projectToken=%s; tokenAddress=%s; tokenDecimal=%s; realTokenDecimal=%s',
+                            project.projectToken, project.tokenAddress, project.tokenDecimal, tokenDecimal);
+                    }
                     tokenDistributeService.filterStatusArr(userTxStatusArr, platformTxStatusArr);
                     let recordUserList = await tokenDistributeService.getRecordUserListByCondition(projectGid, userTxStatusArr, platformTxStatusArr, payTxId);
                     tokenDistributeService.tokenDistribute(project, wallet, recordUserList);

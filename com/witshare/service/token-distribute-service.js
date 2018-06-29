@@ -104,7 +104,7 @@ const tokenDistribute = async function (project, wallet, recordUserList) {
     if (project) {
         let tokenAddress = project.tokenAddress;
         let projectPlatFormAddress = project.platformAddress;
-
+        let tokenDecimal = project.tokenDecimal;
         if (recordUserList && wallet) {
             for (let userRecord of recordUserList) {
                 try {
@@ -117,8 +117,7 @@ const tokenDistribute = async function (project, wallet, recordUserList) {
                     //获取用户的收币地址
                     let sysUserAddress = await SysUserAddress.findByUserGidAndProjectGid(userGid, project.projectGid);
                     let userReceiveAddress = sysUserAddress.getTokenAddress;
-                    //TODO token decimal
-                    let value = totalShouldGetAmount;
+                    let value = bigDecimal.multiply(totalShouldGetAmount, Math.pow(10, tokenDecimal));
                     let defaultTokenTransferGasLimit = Config.eth.default_token_transfer_gas_used;
                     let defaultGasPrice = parseFloat(await ethersObj.provider.getGasPrice());
                     let nonce = await getNonce(projectPlatFormAddress);
