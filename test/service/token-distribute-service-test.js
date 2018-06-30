@@ -13,9 +13,9 @@ const ethersObj = require('../../com/witshare/eth/ethers_obj');
 
 /************************** init *******************************/
 
-test_checkUserPayTxValidity()
+// test_checkUserPayTxValidity()
 // getRecordUserListByCondition();
-// pollingPlatformTxStatus();
+pollingPlatformTxStatus();
 // initRecordUserTx();
 
 // filterStatusArr();

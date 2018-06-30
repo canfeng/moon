@@ -13,14 +13,14 @@ let host = 'http://localhost:3000/moon';
 
 // saveKeyStore();
 // testTokenInfo();
-tokenDistributeProgress();
-// testTokenDistribute()
+// tokenDistributeProgress();
+testTokenDistribute()
 
 async function testTokenDistribute() {
     let params = {
         password: 'ibeesaas',
         projectGid: '1us48s9nz6i6t1t90j2dh6j6sjijrk29',
-        userTxStatusArr: [2],
+        userTxStatusArr: [2,23,4],
         platformTxStatusArr: [],
         payTxId: '',
     };

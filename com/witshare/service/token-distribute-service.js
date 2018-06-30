@@ -108,7 +108,7 @@ const checkUserPayTxValidity = async () => {
  * 验证打币条件并执行
  * @returns {Promise<void>}
  */
-const startTokenDistribute = async (params) => {
+async function startTokenDistribute() {
     let password = params.password;
     let projectGid = params.projectGid;
     let userTxStatusArr = params.userTxStatusArr;
@@ -256,7 +256,7 @@ const execTokenDistribute = async (distributionBatchId, project, wallet, params,
  * @param userTxStatusArr
  * @param platformTxStatusArr
  */
-const filterStatusArr = function (userTxStatusArr, platformTxStatusArr) {
+async function filterStatusArr(userTxStatusArr, platformTxStatusArr) {
     if (userTxStatusArr && userTxStatusArr.length > 0) {
         let OptionalUserTxStatus = [USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH];
         for (let index in userTxStatusArr) {
@@ -437,7 +437,7 @@ const distributeProgress = async function (projectGid, distributionBatchId) {
     return result ? result[0] : null;
 };
 
-const getWalletByV3JsonAndPwd = async function (project, password) {
+async function getWalletByV3JsonAndPwd(project, password) {
     if (project) {
         let redisKeyV3Json = await redisKeyManager.getKeyPlatformProjectV3Json(project.platformAddress);
         let v3Json = await redisUtil.get(redisKeyV3Json.key);
@@ -455,7 +455,4 @@ module.exports = {
     startTokenDistribute: startTokenDistribute,
     distributeProgress: distributeProgress,
     pollingPlatformTxStatus: pollingPlatformTxStatus,
-    filterStatusArr: filterStatusArr,
-    getRecordUserListByCondition: getRecordUserListByConditionAndUpdateBatchId,
-    getWalletByV3JsonAndPwd: getWalletByV3JsonAndPwd
-}
+};
