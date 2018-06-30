@@ -1,8 +1,8 @@
 {
   "redis_key": {
-    "wallet_v3_json": "witshare:moon:db:walletV3Json:",
-    "wallet_address_last_nonce": "witshare:moon:db:walletAddressLastNonce:",
-    "global_config": "witshare:moon:db:globalConfig"
+    "wallet_v3_json": "tokenpie:mars:db:walletV3Json:",
+    "wallet_address_last_nonce": "tokenpie:moon:db:walletAddressLastNonce:",
+    "global_config": "tokenpie:moon:db:globalConfig"
   },
   "request_header": {
     "user_token": "userToken",
