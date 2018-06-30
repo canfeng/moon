@@ -100,7 +100,7 @@ const resendTransaction = async function (userPhone, password, txHash, gasPrice)
                         //已废弃
                         transactionDao.updateByTxHash({
                             txhash: txHash,
-                            status: commonEnum.TX_STATUS.DISCARD
+                            status: commonEnum.PLATFORM_TX_STATUS.DISCARD
                         });
                         return RES_CODE.TRANSACTION_DISCARD;
                     }
@@ -108,7 +108,7 @@ const resendTransaction = async function (userPhone, password, txHash, gasPrice)
                     //已执行
                     transactionDao.updateByTxHash({
                         txhash: txHash,
-                        status: receipt.status() == 1 ? commonEnum.TX_STATUS.CONFIRMED : commonEnum.TX_STATUS.FAIL
+                        status: receipt.status() == 1 ? commonEnum.PLATFORM_TX_STATUS.CONFIRMED : commonEnum.PLATFORM_TX_STATUS.FAILED
                     });
                     return RES_CODE.TRANSACTION_ALREADY_EXECUTE;
                 }

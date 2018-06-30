@@ -13,10 +13,12 @@ const ethersObj = require('../../com/witshare/eth/ethers_obj');
 
 /************************** init *******************************/
 
-// test_checkUserPayTxValidity();
+test_checkUserPayTxValidity()
+// getRecordUserListByCondition();
+// pollingPlatformTxStatus();
 // initRecordUserTx();
 
-filterStatusArr();
+// filterStatusArr();
 
 async function initSysUser() {
     let userGid = commonUtil.randomStr(32);
@@ -63,13 +65,11 @@ async function initSysProject() {
 
 async function initRecordUserTx() {
     let arr = [{
-        tx: '0xd46fc25c54fe7b078c33b05cda539664b3dc97445b9f51e863f35add6b6056aa',
-        payTxId: 10018,
-        amount: 1.2
-    }, {
-        tx: '0xd46fc25c54fe7b078c33b05cda539664b3dc97445b9f51e863f35add6b6056as',
-        payTxId: 10019,
-        amount: 2
+        tx: '0xa7c418c4aa83616d923bc58f899f0f6a310c1d2cb52db91b17108588a9bef92e',
+        amount: 0.7
+    },{
+        tx: '0xca8b76a80fe7d75e5b417e560c25bd8c35ff1a5d6024300bb513bf2984314b44',
+        amount: 0.4
     }];
     for (let i = 0; i < arr.length; i++) {
         RecordUserTx.MODEL.create({
@@ -78,10 +78,9 @@ async function initRecordUserTx() {
             userGid: '7z6862ceud71oj4whb1y40g94e7ranrb',
             userEmail: 'shizhiguo@ibeesaas.com',
             projectGid: '1us48s9nz6i6t1t90j2dh6j6sjijrk29',
-            projectToken: 'Token',
+            projectToken: 'HONEY',
             payCoinType: '0',
             payTx: arr[i].tx,
-            payTxId: arr[i].payTxId,
             payAmount: arr[i].amount,
             priceRate: 10000,
             hopeGetAmount: arr[i].amount * 10000
@@ -97,4 +96,25 @@ async function test_checkUserPayTxValidity() {
 
 async function filterStatusArr() {
     tokenDistributeService.filterStatusArr([1, 13, 5], []);
+}
+
+
+
+async function updatePlatformTxDataByCondition() {
+    let updateRecord = {
+        userGid: '111',
+        platformTx: '123',
+        platformTxStatus: 1
+    };
+    let res= await RecordUserTx.updatePlatformTxDataByCondition(updateRecord, {userTxStatusArr: [1, 2]});
+    console.info(res)
+}
+
+async function getRecordUserListByCondition() {
+    let res =await tokenDistributeService.getRecordUserListByCondition({projectGid:'1us48s9nz6i6t1t90j2dh6j6sjijrk29',userTxStatusArr: [21,5]});
+    console.info(res)
+}
+
+async function pollingPlatformTxStatus() {
+    tokenDistributeService.pollingPlatformTxStatus();
 }

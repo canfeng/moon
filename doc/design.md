@@ -32,11 +32,21 @@
 
 ```
 {
-    "code":"0",
-    "message": "success",
-    "result": null
+    "code": "0",
+    "message": "成功",
+    "result": {
+        "totalCount": 2,
+        "distributionBatchId": "20180630165848157"
+    }
 }
 ```
+- response desc：
+
+| 字段                   | 类型   | 说明               |
+| ---------------------- | ------ | ------------------ |
+| totalCount            | number | 该批次打币用户总数       |
+| distributionBatchId   | string | 打币批次ID   |
+
 ## 获取打币进度
 
 - url : /token/distribute/progress
@@ -45,37 +55,34 @@
 
 ```
 {
-	"projectGid":"123"
+	"projectGid":"123",
+	"distributionBatchId":"20180630165848157" //批次id
 }
 ```
 
 - response body：
 
 ```
-{
-    "code": "0",
-    "message": "成功",
-    "result": {
-        "allCount": 2000000000,
-        "validateSuccessCount": 21000,
-        "distributeSuccessCount":0,
-        "distributeFailedCount":0,
-        "distributingCount":0,
-        "notStartCount":0
-    }
+{ code: '0',
+  message: '成功',
+  result:
+   { totalCount: 2,
+     txSuccessCount: 0,
+     txFailedCount: 0,
+     txPendingCount: 2,
+     notStartCount: 0
+   }
 }
 ```
-
 - response desc：
 
 | 字段                   | 类型   | 说明               |
-| ---------------------- | ------ | ------------------ |
-| allCount               | number | 认购用户总数       |
-| validateSuccessCount   | number | 验证通过的用户数   |
-| distributeSuccessCount | number | 打币完成用户数     |
-| distributeFailedCount  | number | 打币中用户数       |
-| distributingCount      | number | 打币失败用户数     |
-| notStartCount          | number | 未开始打币的用户数 |
+| ----------------------| ------ | ------------------ |
+| totalCount            | number | 批次用户总数       |
+| txSuccessCount        | number | 打币完成用户数     |
+| txFailedCount         | number | 打币失败用户数       |
+| txPendingCount        | number | 打币中用户数     |
+| notStartCount         | number | 未开始打币的用户数 |
 
 ## 获取当前gas价格
 

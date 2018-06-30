@@ -13,13 +13,14 @@ let host = 'http://localhost:3000/moon';
 
 // saveKeyStore();
 // testTokenInfo();
-testTokenDistribute();
+tokenDistributeProgress();
+// testTokenDistribute()
 
 async function testTokenDistribute() {
     let params = {
         password: 'ibeesaas',
         projectGid: '1us48s9nz6i6t1t90j2dh6j6sjijrk29',
-        userTxStatusArr: [1, 13],
+        userTxStatusArr: [2],
         platformTxStatusArr: [],
         payTxId: '',
     };
@@ -28,6 +29,15 @@ async function testTokenDistribute() {
     log.info('res==>', res);
 }
 
+async function tokenDistributeProgress() {
+    let params = {
+        projectGid: '1us48s9nz6i6t1t90j2dh6j6sjijrk29',
+        distributionBatchId:'20180630165848157'
+    };
+    let headers;
+    let res = await httpUtil.get(host + '/token/distribute/progress', params, headers);
+    log.info('res==>', res);
+}
 async function testTokenInfo() {
     let params;
     let headers;

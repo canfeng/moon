@@ -393,7 +393,7 @@ const tokenTransfer = async function (userPhone, transferData) {
                         timeStamp: block.timestamp,
                         blockNum: transaction.blockNumber,
                         txhash: transaction.hash,
-                        status: txReceipt.status == 1 ? commonEnum.TX_STATUS.CONFIRMED : commonEnum.TX_STATUS.FAIL,
+                        status: txReceipt.status == 1 ? commonEnum.PLATFORM_TX_STATUS.CONFIRMED : commonEnum.PLATFORM_TX_STATUS.FAILED,
                         gasFee: gasFee,
                         gasUsed: txReceipt.gasUsed
                     };

@@ -14,37 +14,7 @@ const Config = require(ConfigPath + 'config.json');
  */
 const distributeToken = async function (req, res) {
     try {
-        let password = req.body.password;
-        let projectGid = req.body.projectGid;
-        let userTxStatusArr = req.body.userTxStatusArr;
-        let platformTxStatusArr = req.body.platformTxStatusArr;
-        let payTxId = req.body.payTxId;
-        let response;
-        if (projectGid && password) {
-            let project = await SysProject.findByProjectGid(projectGid);
-            if (project) {
-                //check password
-                let wallet = await tokenDistributeService.getWalletByV3JsonAndPwd(project, password);
-                if (wallet) {
-                    //check decimal
-                    let tokenDecimal = await ethersObj.getDecimals(project.tokenAddress);
-                    if (tokenDecimal !== project.tokenDecimal) {
-                        logger.warn('tokenDistribute() projectToken saved tokenDecimal mismatch with real tokenDecimal==>projectToken=%s; tokenAddress=%s; tokenDecimal=%s; realTokenDecimal=%s',
-                            project.projectToken, project.tokenAddress, project.tokenDecimal, tokenDecimal);
-                    }
-                    tokenDistributeService.filterStatusArr(userTxStatusArr, platformTxStatusArr);
-                    let recordUserList = await tokenDistributeService.getRecordUserListByCondition(projectGid, userTxStatusArr, platformTxStatusArr, payTxId);
-                    tokenDistributeService.tokenDistribute(project, wallet, recordUserList);
-                    response = responseUtil.success();
-                } else {
-                    response = responseUtil.error(RES_CODE.KEYSTORE_OR_PASSWORD_ERROR);
-                }
-            } else {
-                response = responseUtil.error(RES_CODE.PARAMS_ERROR, 'project not found');
-            }
-        } else {
-            response = responseUtil.error(RES_CODE.PARAMS_ERROR, 'projectGid and password are necessary');
-        }
+        let response = await tokenDistributeService.startTokenDistribute(req.body);
         res.jsonp(response);
     } catch (err) {
         logger.error("distributeToken()|exception==>", err);
@@ -59,11 +29,12 @@ const distributeToken = async function (req, res) {
 const distributeProgress = async function (req, res) {
     try {
         let projectGid = req.query.projectGid || req.params.projectGid;
+        let distributionBatchId = req.query.distributionBatchId || req.params.distributionBatchId;
         if (!projectGid) {
             res.jsonp(responseUtil.error(RES_CODE.PARAMS_ERROR));
             return;
         }
-        let summary = await tokenDistributeService.distributeProgress(projectGid);
+        let summary = await tokenDistributeService.distributeProgress(projectGid, distributionBatchId);
         res.jsonp(responseUtil.success(summary));
     } catch (err) {
         logger.error("distributeSummary()|exceptioposn==>", err);

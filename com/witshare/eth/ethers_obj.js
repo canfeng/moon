@@ -289,7 +289,7 @@ var transferWithWallet = async function (contractAddress, wallet, from, to, valu
  * @param gasLimit
  * @param nonce
  * @param funcName
- * @returns {Promise<void>}
+ * @returns {Promise<{hash: null, errorMsg: null}>}
  */
 var transferToken = async function (contractAddress, wallet, gasPrice, from, to, value, gasLimit, nonce, funcName) {
     var data = transferData + "000000000000000000000000" + to.split('0x')[1] + valueToHex64(value);
@@ -302,7 +302,7 @@ var transferToken = async function (contractAddress, wallet, gasPrice, from, to,
         value: utils.parseEther('0.0'),
         chainId: chainId
     };
-    let estimateGas = await provider.estimateGas(transaction);
+    let estimateGas = await wallet.estimateGas(transaction);
     if (estimateGas) {
         transaction.gasLimit = estimateGas;
     }
@@ -407,10 +407,8 @@ var getNonceByAddress = async function (address) {
 };
 
 var refreshTxStatus = function (transactionHash, funcName) {
-    return provider.waitForTransaction(transactionHash).then(function (transaction) {
-        logger.info('refreshTxStatus Transaction Minded : {transaction:%s, hash:%s}l', JSON.stringify(transaction),
-            transaction.hash);
-    });
+    let transaction = provider.waitForTransaction(transactionHash);
+    return transaction;
 };
 
 /**
