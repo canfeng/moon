@@ -284,9 +284,9 @@ async function getRecordUserListByConditionAndUpdateBatchId(params) {
     let whereSql = '';
     let querySql = `select user_gid userGid,count(1) count,sum(actual_pay_amount) totalPayAmount,sum(should_get_amount) totalShouldGetAmount from record_user_tx `;
     let replacements = [];
-    if (params.payTxId) {
+    if (params.id) {
         whereSql = ` where project_gid=? and id =? and user_tx_status in (?,?,?) and platform_tx_status in (?,?,?) `;
-        replacements = [params.payTxId, params.projectGid,
+        replacements = [params.id, params.projectGid,
             USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH,
             PLATFORM_TX_STATUS.INIT, PLATFORM_TX_STATUS.FAILED, PLATFORM_TX_STATUS.DISCARD];
 

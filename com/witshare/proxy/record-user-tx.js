@@ -247,8 +247,8 @@ const updatePlatformTxDataByCondition = async function (record, condition) {
         distributionBatchId: record.distributionBatchId
     };
     if (condition) {
-        if (condition.payTxId) {
-            where.id = condition.payTxId;
+        if (condition.id) {
+            where.id = condition.id;
 
         } else if (condition.platformTxStatusArr && condition.platformTxStatusArr.length > 0) {
             where.platformTxStatus = {
