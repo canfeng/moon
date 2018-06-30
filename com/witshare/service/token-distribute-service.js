@@ -108,7 +108,7 @@ const checkUserPayTxValidity = async () => {
  * 验证打币条件并执行
  * @returns {Promise<void>}
  */
-async function startTokenDistribute() {
+async function startTokenDistribute(params) {
     let password = params.password;
     let projectGid = params.projectGid;
     let userTxStatusArr = params.userTxStatusArr;
