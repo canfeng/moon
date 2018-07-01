@@ -286,12 +286,12 @@ async function getRecordUserListByConditionAndUpdateBatchId(params) {
     let replacements = [];
     if (params.id) {
         whereSql = ` where project_gid=? and id =? and user_tx_status in (?,?,?) and platform_tx_status in (?,?,?) `;
-        replacements = [params.id, params.projectGid,
+        replacements = [params.projectGid, params.id,
             USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH,
             PLATFORM_TX_STATUS.INIT, PLATFORM_TX_STATUS.FAILED, PLATFORM_TX_STATUS.DISCARD];
 
     } else if (params.platformTxStatusArr && params.platformTxStatusArr.length > 0) {
-        whereSql = ` where  projec_gid=? andplatform_tx_status in (?) `;
+        whereSql = ` where project_gid=? and platform_tx_status in (?) `;
         replacements = [params.projectGid, params.platformTxStatusArr];
 
     } else if (params.userTxStatusArr && params.userTxStatusArr.length > 0) {
