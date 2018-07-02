@@ -264,17 +264,28 @@ var transferWithPwd = async function (contractAddress, v3Json, password, from, t
     }
     return transferWithWallet(contractAddress, wallet, from, to, value, gasLimit, gasPrice, nonce);
 };
-var transferWithWallet = async function (contractAddress, wallet, from, to, value, gasLimit, gasPrice, nonce) {
+/**
+ *
+ * @param contractAddress
+ * @param wallet
+ * @param to
+ * @param value
+ * @param gasLimit
+ * @param gasPrice
+ * @param nonce
+ * @returns {Promise<*>}
+ */
+var transferWithWallet = async function (contractAddress, wallet, to, value, gasLimit, gasPrice, nonce) {
     if (!nonce) {
         nonce = await getNonceByAddress(wallet.address);
     }
     wallet.provider = provider;
     logger.info("transaction generate : {contractAddress:%s, from:%s, to:%s, value:%s, " +
-        "gasLimit:%s, gasPrice:%s, nonce:%s}", contractAddress, from, to, value, gasLimit, gasPrice, nonce);
+        "gasLimit:%s, gasPrice:%s, nonce:%s}", contractAddress, wallet.address, to, value, gasLimit, gasPrice, nonce);
     if (contractAddress == '0x0') {
-        return await transferEther(wallet, gasPrice, from, to, nonce, value);
+        return await transferEther(wallet, gasPrice, to, nonce, value);
     } else {
-        return await transferToken(contractAddress, wallet, gasPrice, from, to, value, gasLimit, nonce);
+        return await transferToken(contractAddress, wallet, gasPrice, to, value, gasLimit, nonce);
     }
 };
 
@@ -283,15 +294,13 @@ var transferWithWallet = async function (contractAddress, wallet, from, to, valu
  * @param contractAddress
  * @param wallet
  * @param gasPrice
- * @param from
  * @param to
  * @param value
  * @param gasLimit
  * @param nonce
- * @param funcName
  * @returns {Promise<{hash: null, errorMsg: null}>}
  */
-var transferToken = async function (contractAddress, wallet, gasPrice, from, to, value, gasLimit, nonce, funcName) {
+var transferToken = async function (contractAddress, wallet, gasPrice, to, value, gasLimit, nonce) {
     var data = transferData + "000000000000000000000000" + to.split('0x')[1] + valueToHex64(value);
     var transaction = {
         to: contractAddress,
@@ -313,14 +322,12 @@ var transferToken = async function (contractAddress, wallet, gasPrice, from, to,
  *
  * @param wallet
  * @param gasPrice
- * @param from
  * @param to
  * @param nonce
  * @param value
- * @param funcName
  * @returns {Promise<*>}
  */
-var transferEther = async function (wallet, gasPrice, from, to, nonce, value) {
+var transferEther = async function (wallet, gasPrice, to, nonce, value) {
     // check to address format.
     var prefixSplitArray = /0x/.exec(to);
     var fieldAmountArray = /[0-9a-zA-Z]{42}/.exec(to);

@@ -192,7 +192,7 @@ const execTokenDistribute = async (distributionBatchId, project, wallet, params,
                     let defaultGasPrice = parseFloat(await ethersObj.provider.getGasPrice());
                     let nonce = await getNonce(projectPlatFormAddress);
                     //token转账
-                    let result = await ethersObj.transferWithWallet(tokenAddress, wallet, projectPlatFormAddress, userReceiveAddress, value, defaultTokenTransferGasLimit, defaultGasPrice, nonce);
+                    let result = await ethersObj.transferWithWallet(tokenAddress, wallet, userReceiveAddress, value, defaultTokenTransferGasLimit, defaultGasPrice, nonce);
                     if (!result) {
                         logger.error("execTokenDistribute() transfer error,result is null==>userGid=%s", userGid);
                         continue;
