@@ -29,7 +29,7 @@
   },
   "normal_config": {
     "external_config_path": "/data/config/moon/",
-    "task_cron_check_user_pay_tx_validity": "0 0 1 * * *",
+    "task_cron_check_user_pay_tx_validity": "0 */5 * * * *",
     "task_cron_polling_platform_tx_status": "0 */10 * * * *",
     "task_cron_get_record_platform_tx_detail": "0 */15 * * * *"
   },
