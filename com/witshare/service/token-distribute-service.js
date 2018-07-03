@@ -291,13 +291,15 @@ async function getRecordUserListByConditionAndUpdateBatchId(params) {
             PLATFORM_TX_STATUS.INIT, PLATFORM_TX_STATUS.FAILED, PLATFORM_TX_STATUS.DISCARD];
 
     } else if (params.platformTxStatusArr && params.platformTxStatusArr.length > 0) {
-        whereSql = ` where project_gid=? and platform_tx_status in (?) `;
-        replacements = [params.projectGid, params.platformTxStatusArr];
+        whereSql = ` where project_gid=? and platform_tx_status in (?) and user_tx_status in (?,?,?) `;
+        replacements = [params.projectGid, params.platformTxStatusArr,
+            USER_TX_STATUS.CONFIRM_SUCCESS, USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH, USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH];
 
     } else if (params.userTxStatusArr && params.userTxStatusArr.length > 0) {
         whereSql = ` where project_gid=? and user_tx_status in (?) and platform_tx_status in (?,?,?) `;
         replacements = [params.projectGid, params.userTxStatusArr,
             PLATFORM_TX_STATUS.INIT, PLATFORM_TX_STATUS.FAILED, PLATFORM_TX_STATUS.DISCARD];
+
     } else {
         return null;
     }
