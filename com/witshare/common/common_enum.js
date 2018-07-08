@@ -19,7 +19,9 @@ module.exports = {
         PENDING: 1,
         SUCCESS: 2,
         FAILED: 3,
-        DISCARD: 4
+        DISCARD: 4,
+        //非法交易号
+        TX_INVALID: 5
     },
     USER_TX_STATUS: {
         INIT: 0,

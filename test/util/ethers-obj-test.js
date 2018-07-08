@@ -4,22 +4,49 @@ const ethersObj = require('../../com/witshare/eth/ethers_obj');
 
 
 // generateWalletFromPrivateKey('0x5db26787ae119f7caf6aacd136cc1aac37db838f156e2827183faf1dc351543b');
-getTransaction();
+// getReceipt();
+// getTransaction();
+getReceipt();
 
-function generateWalletFromPrivateKey(privateKey){
+function generateWalletFromPrivateKey(privateKey) {
     const Wallet = ethersObj.Wallet;
     var wallet = new Wallet(privateKey);
     wallet.encrypt('ibeesaas', function (percent) {
-    }).then(function(json) {
+    }).then(function (json) {
         console.log(privateKey + " >>>> " + json);
     });
 }
 
 async function getReceipt() {
-    let receipt = await ethersObj.provider.getTransactionReceipt('0xd46fc25c54fe7b078c33b05cda539664b3dc97445b9f51e863f35add6b6056a1');
+    let receipt = await ethersObj.provider.getTransactionReceipt('0xfce6c86293d97759e01909bdf14646ceaea812c90f0ff81861b9a0d0368ef038');
+    console.info(receipt);
+    if (receipt) {
+        for (let log of receipt.logs) {
+            if (log.topics) {
+                for (let topic of log.topics) {
+                    console.info(`topic ==>${topic}`)
+                }
+            }
+        }
+    }
+}
+
+async function getTransaction() {
+    let receipt = await ethersObj.provider.getTransaction('0xfce6c86293d97759e01909bdf14646ceaea812c90f0ff81861b9a0d0368ef038');
     console.info(receipt)
 }
-async function getTransaction() {
-    let receipt = await ethersObj.provider.getTransaction('0xdc9f30b716597999eafa0cabaa0b33423845e2f13d4c30d845018d4cf7bad933');
-    console.info(receipt)
+
+async function getStorageAt() {
+    let res = await ethersObj.provider.getStorageAt('0x7cA357F0aBF3046627082cfdA45eBee3e17b8791', 0);
+    console.info(res)
+}
+
+async function getCode() {
+    let res = await ethersObj.provider.getCode('0x7cA357F0aBF3046627082cfdA45eBee3e17b8791');
+    console.info(res)
+}
+
+async function transferMethodID() {
+    const tokenTransferMethodId = ethersObj.utils.id('transfer(address,uint256)').substring(0, 10);
+    console.info(tokenTransferMethodId)
 }

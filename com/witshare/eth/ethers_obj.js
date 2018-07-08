@@ -56,6 +56,27 @@ var https = require("https");
 var logger = require("../logger.js").getLogger('ethers_obj');
 var erc20Abi = require('../../../conf/erc20_abi.json');
 
+var parseToAddressByTx = function (methodId, data) {
+    let _to;
+    logger.info("parseToAddressByTx data >> ", data);
+    var dataArray = data.split(methodId);
+    if (dataArray.length > 1) {
+        _to = "0x" + dataArray[1].substr(24, 40);
+    }
+    return _to;
+};
+var parseTokenValueByTx = function (methodId, decimal, data) {
+    let _value = 0;
+    logger.debug("parseTokenValueByTx data >> ", data);
+    var dataArray = data.split(methodId);
+    if (dataArray.length > 1) {
+        _value = parseFloat(parseInt(dataArray[1].substr(65), 16));
+    }
+    var decimal = Math.pow(10, decimal);
+    _value = _value / decimal;
+    return _value;
+};
+
 var ContractCache = require("memory-cache");
 
 var getContractInstance = async function (contractAddress) {
@@ -117,7 +138,7 @@ var getSymbol = async function (contractAddress) {
         return val;
     } catch (err) {
         logger.error('getSymbol()|error==>', err);
-        return configJson.eth.default_token_symbol;
+        return '';
     }
 };
 
@@ -463,6 +484,8 @@ const ethersObj = {
     refreshTxStatus: refreshTxStatus,
     estimateTokenTransferGas: estimateTokenTransferGas,
     valueToHex64: valueToHex64,
+    parseTokenValueByTx: parseTokenValueByTx,
+    parseToAddressByTx: parseToAddressByTx
 };
 
 module.exports = ethersObj;

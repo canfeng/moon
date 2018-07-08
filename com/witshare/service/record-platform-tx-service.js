@@ -1,90 +1,98 @@
-const log = require('../log').getlog('record-platform-tx-service');
+const log = require('../logger').getLogger('record-platform-tx-service');
+const RecordPlatformTx = require('../proxy/record_platform_tx');
+const commonEnum = require('../common/common_enum');
+const bigDecimal = require('js-big-decimal');
+const ethersObj = require('../eth/ethers_obj');
+const configJson = require(ConfigPath + 'config.json');
+const PLATFORM_TX_STATUS = commonEnum.PLATFORM_TX_STATUS;
 
+const erc20TransferMethodId = ethersObj.utils.id('transfer(address,uint256)').substring(0, 10);
+const erc20TransferFromMethodId = ethersObj.utils.id('transferFrom(address,address,uint256)').substring(0, 10);
+const erc20TransferEventTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 
 /**
  * 获取平台和项目之间的交易流水详情和状态
  * @param obj
  * @returns {boolean}
  */
-const getPlatformTxDetail = async () => {
-    log.info('*********************** checkUserPayTxValidity() START *********************');
+const getPlatformTxDetails = async () => {
+    log.info('*********************** getPlatformTxDetails() START *********************');
     const start = Date.now();
-    //获取未校验的用户认购记录
-    let pageIndex = 1;
+    //获取需要查询的交易记录
     let recordList;
     do {
-        let result = await RecordUserTx.pageByUserTxStatus([USER_TX_STATUS.INIT, USER_TX_STATUS.TX_NOT_EXIST]);//暂不分页处理
-        log.info("checkUserPayTxValidity() total count=%s; current pageIndex=%s", result.count, pageIndex);
+        let result = await RecordPlatformTx.pageByTxStatus([PLATFORM_TX_STATUS.INIT, PLATFORM_TX_STATUS.DISCARD], 1, 1000);//暂不分页处理
+        log.info(`getPlatformTxDetails() total count=${result.count}`);
         recordList = result.rows;
         let updatedItem = {};
         for (let record of recordList) {
-            log.info('current validate payTx==>', record.payTx);
+            log.info('getPlatformTxDetails() current search txHash==>', record.txHash);
             try {
                 updatedItem = {
-                    payTx: record.payTx,
+                    txHash: record.txHash,
                     txVerificationTime: new Date()
                 };
-                let payTx = record.payTx;
+                let txHash = record.txHash;
                 //检查交易hash的格式
-                if (/^0x[a-fA-F0-9]{64}$/.test(payTx)) {
+                if (/^0x[a-fA-F0-9]{64}$/.test(txHash)) {
                     //检查交易有效性
-                    let receipt = await ethersObj.provider.getTransactionReceipt(payTx);
-                    let transaction = await ethersObj.provider.getTransaction(payTx);
+                    let receipt = await ethersObj.provider.getTransactionReceipt(txHash);
+                    let transaction = await ethersObj.provider.getTransaction(txHash);
                     if (receipt) {
-                        updatedItem.actualPayAmount = ethersObj.utils.formatEther(transaction.value);
-                        updatedItem.actualSendingAddress = transaction.from;
-                        updatedItem.actualReceivingAddress = transaction.to;
-                        //get block for timestamp
-                        let block = await ethersObj.provider.getBlock(transaction.blockNumber);
-                        updatedItem.actualTxTime = new Date(block.timestamp * 1000);
-                        if (receipt.status == 1) {
-                            //检查to和平台的收币地址是否一致
-                            let sysProject = await SysProject.findByProjectGid(record.projectGid);
-                            if (transaction.to.toLocaleLowerCase() === sysProject.platformAddress.toLocaleLowerCase()) {
-                                //检查from和用户的打币地址是否一致
-                                let sysUserAddress = await SysUserAddress.findByUserGidAndProjectGid(record.userGid, record.projectGid);
-                                if (transaction.from.toLocaleLowerCase() === sysUserAddress.payEthAddress.toLocaleLowerCase()) {
-                                    //比较实际支付的金额和提交申请的金额是否一致，比较至小数点后两位数
-                                    if (bigDecimal.compareTo(bigDecimal.round(updatedItem.actualPayAmount, 2), bigDecimal.round(record.payAmount, 2)) === 0) {
-                                        updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_SUCCESS;//2
-                                    } else {
-                                        updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH;//23
-                                    }
-                                } else {
-                                    updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_FROM_NOT_MATCH;//22
-                                }
-                                //计算应该获得的token数量
-                                updatedItem.shouldGetAmount = bigDecimal.multiply(updatedItem.actualPayAmount, record.priceRate);
-                            } else {
-                                updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_TO_NOT_PLATFORM;//21
+                        updatedItem.txTokenType = 'ETH';
+                        updatedItem.txAmount = ethersObj.utils.formatEther(transaction.value);
+                        updatedItem.fromAddress = transaction.from;
+                        updatedItem.toAddress = transaction.to;
+                        updatedItem.ethFee = ethersObj.utils.formatEther(bigDecimal.multiply(transaction.gasPrice, receipt.gasUsed));
+                        //判断是否是token转账
+                        let addressCode = await ethersObj.provider.getCode(transaction.to);
+                        let transData = transaction.data;
+                        if ('0x' !== addressCode && '0x' !== transData) {
+                            updatedItem.txTokenType = await ethersObj.getSymbol(transaction.to);
+                            let decimal = await ethersObj.getDecimals(transaction.to);
+                            if (transaction.data.startsWith(erc20TransferMethodId)) {
+                                updatedItem.txAmount = ethersObj.parseTokenValueByTx(erc20TransferMethodId, decimal, transData);
+                                updatedItem.toAddress = await ethersObj.parseToAddressByTx(erc20TransferMethodId,transData);
+                            } else if (transaction.data.startsWith(erc20TransferFromMethodId)) {
+                                updatedItem.txAmount = ethersObj.parseTokenValueByTx(erc20TransferFromMethodId, decimal, transData);
+                                updatedItem.toAddress = await ethersObj.parseToAddressByTx(erc20TransferFromMethodId,transData);
                             }
+                        }
+                        //get last blockNumber
+                        let lastBlockNumber = await ethersObj.provider.getBlockNumber();
+                        if (transaction.blockNumber + 6 <= lastBlockNumber) {
+                            //get block for timestamp
+                            let block = await ethersObj.provider.getBlock(transaction.blockNumber);
+                            updatedItem.txTime = new Date(block.timestamp * 1000);
+                            updatedItem.txStatus = receipt.status === 1 ? PLATFORM_TX_STATUS.SUCCESS : PLATFORM_TX_STATUS.FAILED;
                         } else {
-                            updatedItem.userTxStatus = USER_TX_STATUS.TX_FAILED;//3
+                            log.info(`getPlatformTxDetails() tx already mined, but confirmed block number not enough to 6==>txHash=${txHash}; minedBlock=${transaction.blockNumber}; lastBlock=${lastBlockNumber}`);
+                            updatedItem.txStatus = PLATFORM_TX_STATUS.PENDING;//1
                         }
                     } else {
                         if (!transaction) {
-                            log.info("checkUserPayTxValidity() payTx not exist==>payTx=%s", payTx);
-                            updatedItem.userTxStatus = USER_TX_STATUS.TX_NOT_EXIST;//4
+                            log.info(`getPlatformTxDetails() txHash not exist==>txHash=${txHash}`);
+                            updatedItem.txStatus = PLATFORM_TX_STATUS.DISCARD;//4
                         } else {
-                            log.info("checkUserPayTxValidity() payTx not mined==>payTx=%s", payTx);
-                            updatedItem.userTxStatus = USER_TX_STATUS.TX_PENDING;//1
+                            log.info(`getPlatformTxDetails() txHash not mined==>txHash=${txHash}`);
+                            updatedItem.txStatus = PLATFORM_TX_STATUS.PENDING;//1
                         }
                     }
                 } else {
-                    log.info("checkUserPayTxValidity() payTx is invalid==>payTx=%s", payTx);
-                    updatedItem.userTxStatus = USER_TX_STATUS.TX_INVALID;//5
+                    log.info("getPlatformTxDetails() txHash is invalid==>txHash=%s", txHash);
+                    updatedItem.txStatus = PLATFORM_TX_STATUS.TX_INVALID;//5
                 }
-                await RecordUserTx.updateUserTxStatusByPayTx(updatedItem);
+                await RecordPlatformTx.updateTxStatusByPayTx(updatedItem);
             } catch (err) {
-                log.error("checkUserPayTxValidity() exception==>payTx=%s", record.payTx, err);
+                log.error("getPlatformTxDetails() exception==>txHash=%s", record.txHash, err);
                 continue;
             }
         }
-    } while (recordList && recordList.length > 0 && false);//暂时只查询一次
-    log.info('*********************** checkUserPayTxValidity() END *********************** ==> ' +
+    } while (recordList && recordList.length > 0);
+    log.info('*********************** getPlatformTxDetails() END *********************** ==> ' +
         'total used time=%sms;', Date.now() - start);
 };
 
 module.exports = {
-    getPlatformTxDetail: getPlatformTxDetail
+    getPlatformTxDetails: getPlatformTxDetails
 };

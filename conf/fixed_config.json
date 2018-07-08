@@ -31,7 +31,7 @@
     "external_config_path": "/data/config/moon/",
     "task_cron_check_user_pay_tx_validity": "0 */5 * * * *",
     "task_cron_polling_platform_tx_status": "0 */10 * * * *",
-    "task_cron_get_record_platform_tx_detail": "0 */15 * * * *"
+    "task_cron_get_record_platform_tx_details": "0 */15 * * * *"
   },
   "alarm_type": {
     "LOCKED_USER_NUM": {
