@@ -7,7 +7,7 @@ const bigDecimal = require('js-big-decimal');
 // generateWalletFromPrivateKey('0x5db26787ae119f7caf6aacd136cc1aac37db838f156e2827183faf1dc351543b');
 // getReceipt();
 // getTransaction();
-bigDecimaltest();
+getTransaction();
 
 function generateWalletFromPrivateKey(privateKey) {
     const Wallet = ethersObj.Wallet;
@@ -33,13 +33,15 @@ async function getReceipt() {
 }
 
 async function getTransaction() {
-    let receipt = await ethersObj.provider.getTransaction('0xfce6c86293d97759e01909bdf14646ceaea812c90f0ff81861b9a0d0368ef038');
-    console.info(receipt)
+    let res = await ethersObj.provider.getTransaction('0x939edf82b1068b4ea5863db3abd717f24a58cc17ac47a8240dc0fdcba80ee474');
+    console.info('res==>'+res);
+    console.info('value==>'+res.value.toString())
+    console.info('eth==>'+ ethersObj.utils.formatEther(res.value))
 }
 
 async function getStorageAt() {
     let res = await ethersObj.provider.getStorageAt('0x7cA357F0aBF3046627082cfdA45eBee3e17b8791', 0);
-    console.info(res)
+    console.info('res==>'+res);
 }
 
 async function getCode() {

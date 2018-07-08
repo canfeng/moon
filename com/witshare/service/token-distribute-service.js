@@ -66,8 +66,8 @@ const checkUserPayTxValidity = async () => {
                                     //检查from和用户的打币地址是否一致
                                     let sysUserAddress = await SysUserAddress.findByUserGidAndProjectGid(record.userGid, record.projectGid);
                                     if (transaction.from.toLocaleLowerCase() === sysUserAddress.payEthAddress.toLocaleLowerCase()) {
-                                        //比较实际支付的金额和提交申请的金额是否一致，比较至小数点后两位数
-                                        if (bigDecimal.compareTo(bigDecimal.round(updatedItem.actualPayAmount, 2), bigDecimal.round(record.payAmount, 2)) === 0) {
+                                        //比较实际支付的金额和提交申请的金额是否一致，保留9位小数再比较
+                                        if (bigDecimal.compareTo(bigDecimal.round(updatedItem.actualPayAmount, 9), bigDecimal.round(record.payAmount, 9)) === 0) {
                                             updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_SUCCESS;//2
                                         } else {
                                             updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_AMOUNT_NOT_MATCH;//23
