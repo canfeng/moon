@@ -77,6 +77,7 @@ const checkUserPayTxValidity = async () => {
                                     }
                                     //计算应该获得的token数量
                                     updatedItem.shouldGetAmount = bigDecimal.multiply(updatedItem.actualPayAmount, record.priceRate);
+
                                 } else {
                                     updatedItem.userTxStatus = USER_TX_STATUS.CONFIRM_FAIL_TO_NOT_PLATFORM;//21
                                 }
@@ -188,7 +189,7 @@ const execTokenDistribute = async (distributionBatchId, project, wallet, params,
                     let userGid = userRecord.userGid;
                     let totalPayCount = userRecord.count;
                     let totalPayAmount = userRecord.totalPayAmount;
-                    let totalShouldGetAmount = userRecord.totalShouldGetAmount;
+                    let totalShouldGetAmount = bigDecimal.round(userRecord.totalShouldGetAmount, tokenDecimal);
                     logger.info('execTokenDistribute() current userRecord==>userGid=%s; totalPayCount=%s; totalPayAmount=%s; totalShouldGetAmount=%s', userGid, totalPayCount, totalPayAmount, totalShouldGetAmount);
 
                     //获取用户的收币地址

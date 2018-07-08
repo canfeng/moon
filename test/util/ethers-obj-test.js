@@ -1,12 +1,13 @@
 const pathUtil = require('../../com/witshare/util/path-util');
 pathUtil.initConfigPath();
 const ethersObj = require('../../com/witshare/eth/ethers_obj');
+const bigDecimal = require('js-big-decimal');
 
 
 // generateWalletFromPrivateKey('0x5db26787ae119f7caf6aacd136cc1aac37db838f156e2827183faf1dc351543b');
 // getReceipt();
 // getTransaction();
-getReceipt();
+bigDecimaltest();
 
 function generateWalletFromPrivateKey(privateKey) {
     const Wallet = ethersObj.Wallet;
@@ -49,4 +50,11 @@ async function getCode() {
 async function transferMethodID() {
     const tokenTransferMethodId = ethersObj.utils.id('transfer(address,uint256)').substring(0, 10);
     console.info(tokenTransferMethodId)
+}
+
+async function bigDecimaltest() {
+    let res= bigDecimal.multiply('0.1111111111', 8000.0000000000);
+    console.info(res);
+    res = bigDecimal.round(res,9);
+    console.info(res);
 }

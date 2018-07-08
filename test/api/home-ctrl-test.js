@@ -22,7 +22,7 @@ async function testTokenDistribute() {
         projectGid: '1us48s9nz6i6t1t90j2dh6j6sjijrk29',
         userTxStatusArr: [2,23,4],
         platformTxStatusArr: [],
-        id: '',
+        id: '66',
     };
     let headers;
     let res = await httpUtil.post(host + '/token/distribute', params, headers);

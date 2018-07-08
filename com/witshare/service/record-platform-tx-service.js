@@ -52,14 +52,16 @@ const getPlatformTxDetails = async () => {
                             let decimal = await ethersObj.getDecimals(transaction.to);
                             if (transaction.data.startsWith(erc20TransferMethodId)) {
                                 updatedItem.txAmount = ethersObj.parseTokenValueByTx(erc20TransferMethodId, decimal, transData);
-                                updatedItem.toAddress = await ethersObj.parseToAddressByTx(erc20TransferMethodId,transData);
+                                updatedItem.toAddress = await ethersObj.parseToAddressByTx(erc20TransferMethodId, transData);
                             } else if (transaction.data.startsWith(erc20TransferFromMethodId)) {
                                 updatedItem.txAmount = ethersObj.parseTokenValueByTx(erc20TransferFromMethodId, decimal, transData);
-                                updatedItem.toAddress = await ethersObj.parseToAddressByTx(erc20TransferFromMethodId,transData);
+                                updatedItem.toAddress = await ethersObj.parseToAddressByTx(erc20TransferFromMethodId, transData);
                             }
                         }
+
                         //get last blockNumber
                         let lastBlockNumber = await ethersObj.provider.getBlockNumber();
+                        log.info('getPlatformTxDetails() lastBlockNumber==>', lastBlockNumber);
                         if (transaction.blockNumber + 6 <= lastBlockNumber) {
                             //get block for timestamp
                             let block = await ethersObj.provider.getBlock(transaction.blockNumber);

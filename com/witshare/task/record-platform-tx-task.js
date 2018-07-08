@@ -8,6 +8,7 @@ const platformTxService = require('../service/record-platform-tx-service');
  * @returns {Promise<void>}
  */
 const scheduleGetPlatformTxDetails = async function () {
+    platformTxService.getPlatformTxDetails();
     schedule.scheduleJob(FixedConfigJSON.normal_config.task_cron_get_record_platform_tx_details, function () {
         platformTxService.getPlatformTxDetails();
     })
