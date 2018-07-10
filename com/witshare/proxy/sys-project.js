@@ -33,6 +33,10 @@ const SysProject = dbManager.define('sys_project', {
         field: 'token_address',
         type: Sequelize.STRING
     },
+    tokenDecimal: {
+        field: 'token_decimal',
+        type: Sequelize.INTEGER
+    },
     platformAddress: {
         field: 'platform_address',
         type: Sequelize.STRING

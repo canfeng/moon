@@ -15,11 +15,13 @@ const appverCtrl = require('./routes/appver-ctrl');
 const homeCtrl = require('./routes/home-ctrl');
 const commonCtrl = require('./routes/common-ctrl');
 const recordUserTxTask = require('./com/witshare/task/record-user-tx-task');
+const recordPlatformTxTask = require('./com/witshare/task/record-platform-tx-task');
 
 
 /**************************init***************************/
 recordUserTxTask.scheduleCheckUserPayTxValidity();
 recordUserTxTask.schedulePollingPlatformTxStatus();
+recordPlatformTxTask.scheduleGetPlatformTxDetails();
 
 
 var app = express();
@@ -34,7 +36,7 @@ app.use(requestFilter);
 app.use('/moon/appver', appverCtrl);
 app.use('/moon/', commonCtrl);
 
-app.use(signatureFilter);
+// app.use(signatureFilter);//todo
 app.use('/moon/', homeCtrl);
 
 // catch 404 and forward to error handler

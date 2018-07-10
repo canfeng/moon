@@ -1,0 +1,33 @@
+
+token==>
+
+- HONEY
+	- tokenAddress:0xe39eb6a7f5dce8a957901bb04ad8556efd8e9ba1
+	- platformAddress:0x7ca357f0abf3046627082cfda45ebee3e17b8791
+	- platformKeystore:{"address":"7ca357f0abf3046627082cfda45ebee3e17b8791","id":"b05e482c-7adc-4ee6-ae4e-bd7835481d8f","version":3,"Crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"8589437c12e8900398411bcb708183d5"},"ciphertext":"e3ee759a82a0df0283c40ee539fa46be05b65f13a47937d775bb6d74095525d6","kdf":"scrypt","kdfparams":{"salt":"d6855a5e58e9c7891c6f77e6d2f7f956946ac608d37f06e0e8c42b9a74e80585","n":131072,"dklen":32,"p":1,"r":8},"mac":"0d069f8aeb0e46447ea62483341fa72d114e92b0ccc9f9cb53045b4397c5037f"}}
+	- platformPassword:ibeesaas
+	- platformBalance:2.809620986 Ether:9,942,000 HONEY
+	- projectAddress:	0xa77b82ec4fff0ab19f9f7672b20ed5788faa6647
+
+- OMG
+	- tokenAddress:0x68839597fcc76c7d428b7a4b4e4adbc314a7c45d
+	- platformAddress:0x3de2Ae1e7f997F6d5e23EC21EF7852bA807A943d
+	- platformKeystore:{"address":"3de2ae1e7f997f6d5e23ec21ef7852ba807a943d","id":"ea3db6d8-1b9a-4f4b-9be6-89a095eb24cd","version":3,"Crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"ca670cd9da4b12e884ca7634f48a952e"},"ciphertext":"7822d75772ac4794d22e611cb91f57176bf103637adca68888a91e32752cf0e8","kdf":"scrypt","kdfparams":{"salt":"fb02fe0fc004e2a3e877beb27831abecbc6f3c440548f0b0f495adbd5431a65b","n":131072,"dklen":32,"p":1,"r":8},"mac":"f54b93581adb62bdc93d13e420639f533dc65635774f1a1ec0eb43d87c195ac9"},"x-ethers":{"client":"ethers.js","gethFilename":"UTC--2018-07-03T02-11-14.0Z--3de2ae1e7f997f6d5e23ec21ef7852ba807a943d","mnemonicCounter":"5754206fffe8ffa79e943d8ebc1aeca8","mnemonicCiphertext":"df1ee10b8322fd9f7b83c50bf37e3c70","version":"0.1"}}
+	- platformPassword:ibeesaas
+	- platformBalance:1 Ether:10,000,000 OMG
+	- projectAddress:	0xa77b82ec4fff0ab19f9f7672b20ed5788faa6647
+
+User Address==>
+
+- user1
+	- address:0x4244Cf9D716Aa0b73897C2Ab9ae81128de2Da951
+	- keysotre:{"address":"4244cf9d716aa0b73897c2ab9ae81128de2da951","id":"58a416b8-5747-45a9-97a6-3a9ed34037b3","version":3,"Crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"c15cb90ad51b5104ba23ff2e83f7b279"},"ciphertext":"c1133e0fe3edcf937b8694c3921294624a03c74173e04e3bdf20c2c0b798f758","kdf":"scrypt","kdfparams":{"salt":"797fd9085227524712ddbe87dad6acf1eaabf42bbae2d703ec42faac33d9d37f","n":131072,"dklen":32,"p":1,"r":8},"mac":"7ee6bfd6f4e2fa006fdcd4982f82f9af9d5239106cb5ef5a66c4cec55ca86f77"},"x-ethers":{"client":"ethers.js","gethFilename":"UTC--2018-07-02T14-46-27.0Z--4244cf9d716aa0b73897c2ab9ae81128de2da951","mnemonicCounter":"83ca34f33e24869e7475984fff0ad18e","mnemonicCiphertext":"81f9b133f930a5de8938f9f215067cdf","version":"0.1"}}
+	- password:ibeesaas
+- user2
+	- address:0xfeD50163bF7124e51ACd747e1Fe9749A608fCfB6
+	- keystore:{"address":"fed50163bf7124e51acd747e1fe9749a608fcfb6","id":"8f26cfac-68ff-4be9-85cd-666cdbd8bcce","version":3,"Crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"4749d335697b66e8812e5c64aff93579"},"ciphertext":"f8541c0ab6c421197b533312f30aef4d6d4f3d694c27ca5e13e17b08a1a67adf","kdf":"scrypt","kdfparams":{"salt":"0babdc29f29143bf536cd8068622690ca8875ce0b34309cc8d651d083ecbf3c6","n":131072,"dklen":32,"p":1,"r":8},"mac":"0ddbed9873ad4428ec96bbac2725a54bded3e5f365e7ea2367591149a030f5c8"},"x-ethers":{"client":"ethers.js","gethFilename":"UTC--2018-07-02T14-46-28.0Z--fed50163bf7124e51acd747e1fe9749a608fcfb6","mnemonicCounter":"d7d65fe0cd8422ea34fea84d25ef8705","mnemonicCiphertext":"8fae3f6908edd4ca1b20e06ca83a12d2","version":"0.1"}}
+	- password:ibeesaas
+
+
+
+

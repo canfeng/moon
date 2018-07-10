@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const logger = require('../com/witshare/logger').getLogger('');
 const responseUtil = require('../com/witshare/util/response_util');
+const RES_CODE = responseUtil.RES_CODE;
 const ethersObj = require('../com/witshare/eth/ethers_obj');
 const Config = require(ConfigPath + 'config.json');
 
@@ -25,5 +26,31 @@ const currentGas = async function (req, res) {
     }
 };
 
+/**
+ * 获取token的基本信息，包括name，symbol，decimal
+ * @param req
+ * @param res
+ * @returns {Promise<void>}
+ */
+const tokenInfo = async function (req, res) {
+    try {
+        let address = req.params.address;
+        if (!address) {
+            res.jsonp(responseUtil.error(RES_CODE.PARAMS_ERROR));
+            return;
+        }
+        let result = {
+            name: await ethersObj.getName(address),
+            symbol: await ethersObj.getSymbol(address),
+            decimal: await ethersObj.getDecimals(address),
+        };
+        res.jsonp(responseUtil.success(result));
+    } catch (err) {
+        logger.error("tokenInfo()|exception==>", err);
+        res.jsonp(responseUtil.error());
+    }
+};
+
 router.get('/gas/current', currentGas);
+router.get('/token/:address', tokenInfo);
 module.exports = router;

@@ -56,11 +56,32 @@ var https = require("https");
 var logger = require("../logger.js").getLogger('ethers_obj');
 var erc20Abi = require('../../../conf/erc20_abi.json');
 
+var parseToAddressByTx = function (methodId, data) {
+    let _to;
+    logger.info("parseToAddressByTx data >> ", data);
+    var dataArray = data.split(methodId);
+    if (dataArray.length > 1) {
+        _to = "0x" + dataArray[1].substr(24, 40);
+    }
+    return _to;
+};
+var parseTokenValueByTx = function (methodId, decimal, data) {
+    let _value = 0;
+    logger.debug("parseTokenValueByTx data >> ", data);
+    var dataArray = data.split(methodId);
+    if (dataArray.length > 1) {
+        _value = parseFloat(parseInt(dataArray[1].substr(65), 16));
+    }
+    var decimal = Math.pow(10, decimal);
+    _value = _value / decimal;
+    return _value;
+};
+
 var ContractCache = require("memory-cache");
 
 var getContractInstance = async function (contractAddress) {
     var contract = ContractCache.get(contractAddress);
-    if (commonUtil.isNull(contract)) {
+    if (!contract) {
         contract = await new Contract(contractAddress, erc20Abi, provider);
         logger.debug("new contract : " + contract);
         ContractCache.put(contractAddress, contract);
@@ -117,7 +138,7 @@ var getSymbol = async function (contractAddress) {
         return val;
     } catch (err) {
         logger.error('getSymbol()|error==>', err);
-        return configJson.eth.default_token_symbol;
+        return '';
     }
 };
 
@@ -264,17 +285,28 @@ var transferWithPwd = async function (contractAddress, v3Json, password, from, t
     }
     return transferWithWallet(contractAddress, wallet, from, to, value, gasLimit, gasPrice, nonce);
 };
-var transferWithWallet = async function (contractAddress, wallet, from, to, value, gasLimit, gasPrice, nonce) {
+/**
+ *
+ * @param contractAddress
+ * @param wallet
+ * @param to
+ * @param value
+ * @param gasLimit
+ * @param gasPrice
+ * @param nonce
+ * @returns {Promise<*>}
+ */
+var transferWithWallet = async function (contractAddress, wallet, to, value, gasLimit, gasPrice, nonce) {
     if (!nonce) {
         nonce = await getNonceByAddress(wallet.address);
     }
     wallet.provider = provider;
     logger.info("transaction generate : {contractAddress:%s, from:%s, to:%s, value:%s, " +
-        "gasLimit:%s, gasPrice:%s, nonce:%s}", contractAddress, from, to, value, gasLimit, gasPrice, nonce);
+        "gasLimit:%s, gasPrice:%s, nonce:%s}", contractAddress, wallet.address, to, value, gasLimit, gasPrice, nonce);
     if (contractAddress == '0x0') {
-        return await transferEther(wallet, gasPrice, from, to, nonce, value);
+        return await transferEther(wallet, gasPrice, to, nonce, value);
     } else {
-        return await transferToken(contractAddress, wallet, gasPrice, from, to, value, gasLimit, nonce);
+        return await transferToken(contractAddress, wallet, gasPrice, to, value, gasLimit, nonce);
     }
 };
 
@@ -283,15 +315,13 @@ var transferWithWallet = async function (contractAddress, wallet, from, to, valu
  * @param contractAddress
  * @param wallet
  * @param gasPrice
- * @param from
  * @param to
  * @param value
  * @param gasLimit
  * @param nonce
- * @param funcName
- * @returns {Promise<void>}
+ * @returns {Promise<{hash: null, errorMsg: null}>}
  */
-var transferToken = async function (contractAddress, wallet, gasPrice, from, to, value, gasLimit, nonce, funcName) {
+var transferToken = async function (contractAddress, wallet, gasPrice, to, value, gasLimit, nonce) {
     var data = transferData + "000000000000000000000000" + to.split('0x')[1] + valueToHex64(value);
     var transaction = {
         to: contractAddress,
@@ -302,7 +332,7 @@ var transferToken = async function (contractAddress, wallet, gasPrice, from, to,
         value: utils.parseEther('0.0'),
         chainId: chainId
     };
-    let estimateGas = await provider.estimateGas(transaction);
+    let estimateGas = await wallet.estimateGas(transaction);
     if (estimateGas) {
         transaction.gasLimit = estimateGas;
     }
@@ -313,14 +343,12 @@ var transferToken = async function (contractAddress, wallet, gasPrice, from, to,
  *
  * @param wallet
  * @param gasPrice
- * @param from
  * @param to
  * @param nonce
  * @param value
- * @param funcName
  * @returns {Promise<*>}
  */
-var transferEther = async function (wallet, gasPrice, from, to, nonce, value) {
+var transferEther = async function (wallet, gasPrice, to, nonce, value) {
     // check to address format.
     var prefixSplitArray = /0x/.exec(to);
     var fieldAmountArray = /[0-9a-zA-Z]{42}/.exec(to);
@@ -407,10 +435,8 @@ var getNonceByAddress = async function (address) {
 };
 
 var refreshTxStatus = function (transactionHash, funcName) {
-    return provider.waitForTransaction(transactionHash).then(function (transaction) {
-        logger.info('refreshTxStatus Transaction Minded : {transaction:%s, hash:%s}l', JSON.stringify(transaction),
-            transaction.hash);
-    });
+    let transaction = provider.waitForTransaction(transactionHash);
+    return transaction;
 };
 
 /**
@@ -458,6 +484,8 @@ const ethersObj = {
     refreshTxStatus: refreshTxStatus,
     estimateTokenTransferGas: estimateTokenTransferGas,
     valueToHex64: valueToHex64,
+    parseTokenValueByTx: parseTokenValueByTx,
+    parseToAddressByTx: parseToAddressByTx
 };
 
 module.exports = ethersObj;

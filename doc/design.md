@@ -18,7 +18,7 @@
 
 ##打币接口
 
-- url : /token/distruibute
+- url : /token/distribute
 - method：post
 - request body：
 ```
@@ -32,63 +32,62 @@
 
 ```
 {
-    "code":"0",
-    "message": "success",
-    "result": null
+    "code": "0",
+    "message": "成功",
+    "result": {
+        "totalCount": 2,
+        "distributionBatchId": "20180630165848157"
+    }
 }
 ```
+- response desc：
+
+| 字段                   | 类型   | 说明               |
+| ---------------------- | ------ | ------------------ |
+| totalCount            | number | 该批次打币用户总数       |
+| distributionBatchId   | string | 打币批次ID   |
+
 ## 获取打币进度
 
-- url : /token/distruibute/progress
+- url : /token/distribute/progress
 - method：get
 - request body：
 
 ```
 {
-	"projectGid":"123"
+	"projectGid":"123",
+	"distributionBatchId":"20180630165848157" //批次id
 }
 ```
 
 - response body：
 
 ```
-{
-    "code": "0",
-    "message": "成功",
-    "result": {
-        "allCount": 2000000000,
-        "validateSuccessCount": 21000,
-        "distributeSuccessCount":0,
-        "distributeFailedCount":0,
-        "distributingCount":0,
-        "notStartCount":0
-    }
+{ code: '0',
+  message: '成功',
+  result:
+   { totalCount: 2,
+     txSuccessCount: 0,
+     txFailedCount: 0,
+     txPendingCount: 2,
+     notStartCount: 0
+   }
 }
 ```
-
 - response desc：
 
 | 字段                   | 类型   | 说明               |
-| ---------------------- | ------ | ------------------ |
-| allCount               | number | 认购用户总数       |
-| validateSuccessCount   | number | 验证通过的用户数   |
-| distributeSuccessCount | number | 打币完成用户数     |
-| distributeFailedCount  | number | 打币中用户数       |
-| distributingCount      | number | 打币失败用户数     |
-| notStartCount          | number | 未开始打币的用户数 |
+| ----------------------| ------ | ------------------ |
+| totalCount            | number | 批次用户总数       |
+| txSuccessCount        | number | 打币完成用户数     |
+| txFailedCount         | number | 打币失败用户数       |
+| txPendingCount        | number | 打币中用户数     |
+| notStartCount         | number | 未开始打币的用户数 |
 
 ## 获取当前gas价格
 
-- url : /token/distruibute/progress
+- url : /gas/current
 - method：get
-- request body：
-
-```
-{
-	"projectGid":"123"
-}
-```
-
 - response body：
 
 ```
@@ -111,6 +110,36 @@
 | gasPriceGWei | string | 当前gasPrice，单位gwei |
 | ethGasLimit  | number | ETH转账默认的gasLimit  |
 
+## 获取token的基本信息
+
+- url : /token/{address}
+- method：get
+- request parameter：
+```
+{address} => token的地址
+```
+- response body：
+
+```
+{
+    "code": "0",
+    "message": "成功",
+    "result": {
+        "name": "Bee Honey Token",
+        "symbol": "HONEY",
+        "decimal": "9"
+    }
+}
+```
+
+- response desc：
+
+| 字段         | 类型   | 说明                   |
+| ------------ | ------ | ---------------------- |
+| name         | string | token的全称  |
+| symbol         | string | token的名称 |
+| decimal  | string | token的精度  |
+
 # 定时任务
 
 ## 定时检查校验认筹用户的真实性
@@ -119,10 +148,3 @@
 
 
 
-# 核心业务逻辑
-
-## token分发流程
-
-- A. 检查条件
-1. 项目是否未完成，是否未达到硬顶
-2. 
