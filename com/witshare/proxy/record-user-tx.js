@@ -56,6 +56,13 @@ const RecordUserTx = dbManager.define('record_user_tx', {
         type: Sequelize.DECIMAL
     },
     /**
+     * 交易赠送率
+     */
+    freeGiveRate: {
+        field: 'free_give_rate',
+        type: Sequelize.DECIMAL
+    },
+    /**
      * 用户期望得到的token数量
      */
     hopeGetAmount: {
