@@ -189,7 +189,7 @@ const execTokenDistribute = async (distributionBatchId, project, wallet, params,
                     let userGid = userRecord.userGid;
                     let totalPayCount = userRecord.count;
                     let totalPayAmount = userRecord.totalPayAmount;
-                    let totalShouldGetAmount = bigDecimal.round(userRecord.totalShouldGetAmount, tokenDecimal);
+                    let totalShouldGetAmount = bigDecimal.round(bigDecimal.multiply(userRecord.totalShouldGetAmount, 1 + parseFloat(userRecord.freeGiveRate)), tokenDecimal);
                     logger.info('execTokenDistribute() current userRecord==>userGid=%s; totalPayCount=%s; totalPayAmount=%s; totalShouldGetAmount=%s', userGid, totalPayCount, totalPayAmount, totalShouldGetAmount);
 
                     //获取用户的收币地址
