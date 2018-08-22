@@ -136,8 +136,8 @@ async function tokenTransfer() {
     let targetAddress = '0x3de2Ae1e7f997F6d5e23EC21EF7852bA807A943d';
     let owner = {
         address: '0xa77B82EC4FFF0ab19F9F7672B20Ed5788FaA6647',
-        keystore: '{"address":"a77b82ec4fff0ab19f9f7672b20ed5788faa6647","id":"d478909c-1621-48db-a59c-f42539f39bda","version":3,"Crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"444c8afd0809209e9c59d2b6e4779237"},"ciphertext":"04a44829fcba0bd8b81d82b1363974b53f18adf50f29289bfcd430fe5d0a3ae0","kdf":"scrypt","kdfparams":{"salt":"8a4f9476f5d9a58cb297d102cd43030a1446ef5dd4cf20fa84f46ec53b32c87d","n":131072,"dklen":32,"p":1,"r":8},"mac":"38801d6956c7b7e2968f84dd165ace9e241383c7988d2a2dca8ef2213292e528"}}',
-        password: 'ibeesaas'
+        keystore: '',
+        password: ''
     }
 
     let wallet = await ethersObj.getWalletFromV3Json(owner.keystore, owner.password);

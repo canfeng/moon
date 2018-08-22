@@ -4,10 +4,15 @@ const ethersObj = require('../../com/witshare/eth/ethers_obj');
 const bigDecimal = require('js-big-decimal');
 
 
-generateWalletFromPrivateKey('0x83a2e929cbf9a0f797f447239570d96f598a77a259be117ca84467d086029e0c');
+createWallet();
 // getReceipt();
 // getTransaction();
 // getTransaction();
+
+async function createWallet() {
+    let wallet =await ethersObj.createWallet();
+    console.info(wallet)
+}
 
 function generateWalletFromPrivateKey(privateKey) {
     const Wallet = ethersObj.Wallet;
