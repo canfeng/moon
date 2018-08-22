@@ -304,5 +304,12 @@ module.exports = {
     pageByUserTxStatus: pageByUserTxStatus,
     updateUserTxStatusByPayTx: updateUserTxStatusByPayTx,
     updatePlatformTxDataByCondition: updatePlatformTxDataByCondition,
-    updatePlatformTxStatusByPlatformTx: updatePlatformTxStatusByPlatformTx
+    updatePlatformTxStatusByPlatformTx: updatePlatformTxStatusByPlatformTx,
+    insert: async function (record, tx) {
+        record.createTime = record.updateTime = Date.now();
+        let res = await RecordUserTx.create(record, {
+            transaction: tx
+        });
+        return res ? res.get() : null;
+    }
 };

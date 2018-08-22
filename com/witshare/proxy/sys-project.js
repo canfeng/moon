@@ -57,6 +57,10 @@ const SysProject = dbManager.define('sys_project', {
         field: 'min_purchase_amount',
         type: Sequelize.DECIMAL
     },
+    maxPurchaseAmount: {
+        field: 'max_purchase_amount',
+        type: Sequelize.DECIMAL
+    },
     startTime: {
         field: 'start_time',
         type: Sequelize.DATE, get() {
@@ -97,4 +101,20 @@ const findByProjectGid = async function (projectGid) {
 module.exports = {
     MODEL: SysProject,
     findByProjectGid: findByProjectGid,
+    findBySymbolAndProjectAddress: async function (symbol, projectAddress) {
+        let one = await SysProject.findOne({
+            where: {
+                projectToken: symbol,
+                projectAddress: projectAddress
+            }
+        });
+        return one ? one.get() : null;
+    },
+    insert: async function (record, tx) {
+        record.createTime = record.updateTime = Date.now();
+        let res = await SysProject.create(record, {
+            transaction: tx
+        });
+        return res ? res.get() : null;
+    }
 }

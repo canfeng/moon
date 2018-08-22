@@ -16,7 +16,7 @@
 
 - post请求：使用json格式的字符串附在request body中传入，需要在header中指定 "Content-Type:application/json;charset=UTF-8"
 
-##打币接口
+## 打币接口
 
 - url : /token/distribute
 - method：post

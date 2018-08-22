@@ -11,21 +11,6 @@
     "jpush_reg_id": "jPushRegId"
   },
   "global_config": {
-    "expire_transfer_token": 180,
-    "expire_sms_valid_code": 900,
-    "expire_user_pwd_continuous_error_times": 86400,
-    "expire_user_transfer_times": 86400,
-    "expire_user_frequent_request_times": 60,
-    "expire_transfer_token_used_times": 150,
-    "expire_locked_user_list_key": 864000,
-    "expire_wallet_address_and_user_phone_mismatch_num_key": 86400,
-    "expire_user_transfer_call_times_key": 3600,
-    "expire_user_transfer_call_failed_times_key": 3600,
-    "upper_limit_user_wallet_count": 10,
-    "upper_limit_user_pwd_continuous_error_times": 5,
-    "upper_limit_user_transfer_times": 20,
-    "upper_limit_user_frequent_request_times": 100,
-    "ios_mask_img_enable": 1
   },
   "normal_config": {
     "external_config_path": "/data/config/moon/",
@@ -33,29 +18,11 @@
     "task_cron_polling_platform_tx_status": "0 */10 * * * *",
     "task_cron_get_record_platform_tx_details": "0 */15 * * * *"
   },
-  "alarm_type": {
-    "LOCKED_USER_NUM": {
-      "desc": "当日锁定账户数",
-      "limit": 300
-    },
-    "SINGLE_TRANSACTION_AMOUNT": {
-      "desc": "单笔转账金额",
-      "limit": 50000
-    },
-    "TRANSFER_FAIL_RATE": {
-      "desc": "转账失败率",
-      "limit": 0.5
-    },
-    "WALLETADDRESS_USERPHONE_MISMATCH_NUM": {
-      "desc": "当日手机号和钱包地址不匹配次数",
-      "limit": 50
-    }
-  },
-  "alarm_contacts": {
-    "phones": [
-      "13141317755",
-      "18910554765",
-      "13910196279"
-    ]
+  "eth": {
+    "default_account": "0x86a2f9ec5b9e80b2f8181a6165cdbd47632b76b7",
+    "default_eth_transfer_gas_used": 21000,
+    "default_token_transfer_gas_used": 60000,
+    "transfer_gas_used_ratio": 1.2,
+    "max_gas_price": 5000000000
   }
 }

@@ -53,5 +53,12 @@ const findByUserGid = async function (userGid) {
 
 module.exports = {
     MODEL: SysUser,
-    findByUserGid: findByUserGid
+    findByUserGid: findByUserGid,
+    insert: async function (record, tx) {
+        record.createTime = record.updateTime = Date.now();
+        let res = await SysUser.create(record, {
+            transaction: tx
+        });
+        return res ? res.get() : null;
+    }
 };

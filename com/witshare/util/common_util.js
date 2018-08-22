@@ -1,3 +1,5 @@
+const uuid = require('UUID');
+
 //判断字符是否为空的方法
 const isEmpty = function (obj) {
     if (typeof obj == "undefined" || obj == null || obj == "") {
@@ -103,6 +105,15 @@ function hidePassword(obj) {
     return cobj;
 }
 
+function UUID() {
+    return uuid.v4();
+}
+
+function shortUUID() {
+    let id = UUID();
+    return id.replace(/-/g, '');
+}
+
 module.exports = {
     isEmpty: isEmpty,
     isNumber: isNumber,
@@ -111,5 +122,7 @@ module.exports = {
     delay: delay,
     shallowCopy: shallowCopy,
     deepCopy: deepCopy,
-    hidePassword: hidePassword
+    hidePassword: hidePassword,
+    uuid: UUID,
+    shortUuid: shortUUID
 };

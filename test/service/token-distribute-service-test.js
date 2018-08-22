@@ -21,7 +21,7 @@ const bigDecimal = require('js-big-decimal');
 
 // filterStatusArr();
 
-tokenTransfer()
+pollingPlatformTxStatus()
 
 async function initSysUser() {
     let userGid = commonUtil.randomStr(32);

@@ -11,18 +11,17 @@ const log = require('../../com/witshare/logger').getLogger('home-ctrl-test');
 let host = 'http://localhost:3000/moon';
 
 
-// saveKeyStore();
+saveKeyStore().then(testTokenDistribute);
 // testTokenInfo();
 // tokenDistributeProgress();
-testTokenDistribute()
+// testTokenDistribute()
 
 async function testTokenDistribute() {
     let params = {
-        password: 'ibeesaas',
-        projectGid: '1us48s9nz6i6t1t90j2dh6j6sjijrk29',
-        userTxStatusArr: [2,23,4],
+        password: '',
+        projectGid: '38b9ab6f15ca43e48870f8caeea016ac',
+        userTxStatusArr: [2],
         platformTxStatusArr: [],
-        id: '66',
     };
     let headers;
     let res = await httpUtil.post(host + '/token/distribute', params, headers);
@@ -32,12 +31,13 @@ async function testTokenDistribute() {
 async function tokenDistributeProgress() {
     let params = {
         projectGid: '1us48s9nz6i6t1t90j2dh6j6sjijrk29',
-        distributionBatchId:'20180630165848157'
+        distributionBatchId: '20180630165848157'
     };
     let headers;
     let res = await httpUtil.get(host + '/token/distribute/progress', params, headers);
     log.info('res==>', res);
 }
+
 async function testTokenInfo() {
     let params;
     let headers;
@@ -45,10 +45,9 @@ async function testTokenInfo() {
     log.info('res==>', res);
 }
 
-
 async function saveKeyStore() {
-    let address = '0x7ca357f0abf3046627082cfda45ebee3e17b8791';
-    let keystore = '{"address":"7ca357f0abf3046627082cfda45ebee3e17b8791","id":"b05e482c-7adc-4ee6-ae4e-bd7835481d8f","version":3,"Crypto":{"cipher":"aes-128-ctr","cipherparams":{"iv":"8589437c12e8900398411bcb708183d5"},"ciphertext":"e3ee759a82a0df0283c40ee539fa46be05b65f13a47937d775bb6d74095525d6","kdf":"scrypt","kdfparams":{"salt":"d6855a5e58e9c7891c6f77e6d2f7f956946ac608d37f06e0e8c42b9a74e80585","n":131072,"dklen":32,"p":1,"r":8},"mac":"0d069f8aeb0e46447ea62483341fa72d114e92b0ccc9f9cb53045b4397c5037f"}}';
+    let address = '0x81A4962699F047C65baBee5E59f14a021F22A40A';
+    let keystore = '';
     let keyInfo = await redisKeyManager.getKeyPlatformProjectV3Json(address);
     redisUtil.set(keyInfo.key, keystore, 60 * 60);
 }

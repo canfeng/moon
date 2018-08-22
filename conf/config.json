@@ -1,0 +1,29 @@
+{
+  "aes_cipher_key": {
+  },
+  "request_header": {
+    "user_token": "userToken",
+    "device_number": "userLoginDevice",
+    "remote_request_ip_field": "X-Forwarded-For",
+    "jpush_reg_id": "jPushRegId"
+  },
+  "eth": {
+    "provider_network": "mainnet",
+    "provider_url": "https://mainnet.infura.io",
+    "chain_id": 1,
+    "explorerUrl": "https://ropsten.etherscan.io/",
+    "etherscan_url_prefix": "https://ropsten.etherscan.io/",
+    "etherscan_apikey": "HE28SI4SQKU2VE11M1SRTEST9DYMIFBYRG",
+    "api_etherscan_url_prefix": "https://api-ropsten.etherscan.io/"
+  },
+  "ibeesaas": {
+    "moon": {
+      "name": "moon",
+      "version": "v2",
+      "header": "X-Witshare-Token",
+      "ak_sk": {
+        "c8indnclqc4tmul6qc4e1gd40b4dlt72": ""
+      }
+    }
+  }
+}

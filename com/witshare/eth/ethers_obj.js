@@ -1,15 +1,15 @@
 var ethers = require("ethers");
-var configJson = require(ConfigPath + 'config.json');
+var Config = require(ConfigPath + 'config.json');
+var FixedConfig = require('../../../conf/fixed_config.json');
 var Wallet = ethers.Wallet;
 var Contract = ethers.Contract;
 var providers = ethers.providers;
 var network = providers.networks.rinkeby;
 var utils = ethers.utils;
-var providerNetwork = configJson.eth.provider_network;
-var chainId = configJson.eth.chain_id;
-var walletExpire = configJson.eth.wallet_expire;
-var etherscanApikey = configJson.eth.etherscan_apikey;
-var ApiEtherScanUrl = configJson.eth.api_etherscan_url_prefix;
+var providerNetwork = Config.eth.provider_network;
+var chainId = Config.eth.chain_id;
+var etherscanApikey = Config.eth.etherscan_apikey;
+var ApiEtherScanUrl = Config.eth.api_etherscan_url_prefix;
 
 var transferData = utils.id('transfer(address,uint256)').substring(0, 10);
 // classic,kovan,rinkeby,testnet,ropsten,morden,mainnet,homestead,unspecified
@@ -47,10 +47,10 @@ switch (providerNetwork) {
     default:
         network = "";
 }
-var provider = (!network || network == "") ? new providers.JsonRpcProvider(configJson.eth.provider_url) :
-    new providers.JsonRpcProvider(configJson.eth.provider_url, network);
-var readProvider = (!network || network == "") ? new providers.JsonRpcProvider(configJson.eth.provider_url) :
-    new providers.JsonRpcProvider(configJson.eth.provider_url, network);
+var provider = (!network || network == "") ? new providers.JsonRpcProvider(Config.eth.provider_url) :
+    new providers.JsonRpcProvider(Config.eth.provider_url, network);
+var readProvider = (!network || network == "") ? new providers.JsonRpcProvider(Config.eth.provider_url) :
+    new providers.JsonRpcProvider(Config.eth.provider_url, network);
 var walletCache = require("./wallet_cache.js");
 var https = require("https");
 var logger = require("../logger.js").getLogger('ethers_obj');
@@ -115,7 +115,7 @@ var getSymbol = async function (contractAddress) {
     }
     if (!contractAddress) {
         logger.error('getSymbol()|error==>', err);
-        return configJson.eth.default_token_symbol;
+        return Config.eth.default_token_symbol;
     }
     try {
         var data = utils.id('symbol()').substring(0, 10);
@@ -127,7 +127,7 @@ var getSymbol = async function (contractAddress) {
         var val = await provider.call(transaction);
         val = utils.toUtf8String(val);
         if (!val) {
-            return configJson.eth.default_token_symbol;
+            return '';
         }
         val = val.replace(/\0/g, '');
         val = val.match(/[0-9a-zA-Z\u4e00-\u9fa5]+/)[0];
@@ -240,7 +240,7 @@ const getWalletFromV3Json = async function (v3Json, password) {
  */
 var estimateTokenTransferGas = async function (tokenAddress, from, to, value) {
     if (tokenAddress == '0x0') {
-        return configJson.eth.default_eth_transfer_gas_used;
+        return FixedConfig.eth.default_eth_transfer_gas_used;
     }
     let data = transferData;
 
@@ -256,13 +256,13 @@ var estimateTokenTransferGas = async function (tokenAddress, from, to, value) {
             };
             const gas = await provider.estimateGas(transaction);
             if (gas) {
-                return utils.bigNumberify(gas).toString() * configJson.eth.transfer_gas_used_ratio;
+                return utils.bigNumberify(gas).toString() * FixedConfig.eth.transfer_gas_used_ratio;
             }
         } catch (err) {
             logger.error('estimateTokenTransferGas()|error==>', err);
         }
     }
-    return configJson.eth.default_token_transfer_gas_used;
+    return FixedConfig.eth.default_token_transfer_gas_used;
 };
 /**
  * 转账
@@ -358,11 +358,15 @@ var transferEther = async function (wallet, gasPrice, to, nonce, value) {
     var transaction = {
         to: to,
         gasPrice: gasPrice,
-        gasLimit: configJson.eth.default_eth_transfer_gas_used,
+        gasLimit: FixedConfig.eth.default_eth_transfer_gas_used,
         nonce: nonce,
         value: parseFloat(value),
         chainId: chainId
     };
+    let estimateGas = await wallet.estimateGas(transaction);
+    if (estimateGas) {
+        transaction.gasLimit = estimateGas;
+    }
     return await sendRawTransaction(transaction, wallet);
 };
 

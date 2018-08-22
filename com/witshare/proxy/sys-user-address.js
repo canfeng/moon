@@ -56,5 +56,12 @@ module.exports = {
             }
         });
         return one ? one.get() : null;
+    },
+    insert: async function(record, tx) {
+        record.createTime = record.updateTime = Date.now();
+        let res = await SysUserAddress.create(record, {
+            transaction: tx
+        });
+        return res ? res.get() : null;
     }
 };

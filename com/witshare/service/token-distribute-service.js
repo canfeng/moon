@@ -18,6 +18,7 @@ const RecordUserTx = require('../proxy/record-user-tx');
 const ethersObj = require('../eth/ethers_obj');
 const Config = require(ConfigPath + 'config.json');
 const timeUtil = require('../util/time_util');
+const FixedConfig = require('../../../conf/fixed_config.json');
 
 /**
  * 校验用户认筹交易有效性
@@ -128,36 +129,40 @@ async function startTokenDistribute(params) {
             //check password
             let wallet = await getWalletByV3JsonAndPwd(project, password);
             if (wallet) {
-                //check decimal
-                let tokenDecimal = await ethersObj.getDecimals(project.tokenAddress);
-                if (tokenDecimal == project.tokenDecimal) {
-                    filterStatusArr(userTxStatusArr, platformTxStatusArr);
-                    let result = await getRecordUserListByConditionAndUpdateBatchId(params);
-                    if (result && result.userList && result.userList.length > 0) {
-                        let totalCount = 0;
-                        for (let item of result.userList) {
-                            totalCount += item.count;
-                        }
-                        let distributionBatchId = timeUtil.formatCurrentDateTime('yyyyMMddhhmmssS');
-                        //更新打币批次id
-                        let changeCount = await updateDistributionBatchId(distributionBatchId, result.whereSql, result.replacements);
-                        if (changeCount && changeCount == totalCount) {
-                            //当更新的打币批次影响行数和查询出来的结果集的行数一致时，才执行打币
-                            execTokenDistribute(distributionBatchId, project, wallet, params, result.userList);
-                            response = responseUtil.success({
-                                totalUserCount: result.userList.length,
-                                distributionBatchId: distributionBatchId
-                            });
+                if (wallet.address.toLowerCase() === project.platformAddress.toLowerCase()) {
+                    //check decimal
+                    let tokenDecimal = await ethersObj.getDecimals(project.tokenAddress);
+                    if (tokenDecimal == project.tokenDecimal) {
+                        filterStatusArr(userTxStatusArr, platformTxStatusArr);
+                        let result = await getRecordUserListByConditionAndUpdateBatchId(params);
+                        if (result && result.userList && result.userList.length > 0) {
+                            let totalCount = 0;
+                            for (let item of result.userList) {
+                                totalCount += item.count;
+                            }
+                            let distributionBatchId = timeUtil.formatCurrentDateTime('yyyyMMddhhmmssS');
+                            //更新打币批次id
+                            let changeCount = await updateDistributionBatchId(distributionBatchId, result.whereSql, result.replacements);
+                            if (changeCount && changeCount == totalCount) {
+                                //当更新的打币批次影响行数和查询出来的结果集的行数一致时，才执行打币
+                                execTokenDistribute(distributionBatchId, project, wallet, params, result.userList);
+                                response = responseUtil.success({
+                                    totalUserCount: result.userList.length,
+                                    distributionBatchId: distributionBatchId
+                                });
+                            } else {
+                                response = responseUtil.error(RES_CODE.FAILED, '更新打币批次ID有误，请重试');
+                            }
                         } else {
-                            response = responseUtil.error(RES_CODE.FAILED, '更新打币批次ID有误，请重试');
+                            response = responseUtil.error(RES_CODE.FAILED, '没有符合条件的记录');
                         }
                     } else {
-                        response = responseUtil.error(RES_CODE.FAILED, '没有符合条件的记录');
+                        logger.warn('tokenDistribute() projectToken saved tokenDecimal mismatch with real tokenDecimal==>projectToken=%s; tokenAddress=%s; tokenDecimal=%s; realTokenDecimal=%s',
+                            project.projectToken, project.tokenAddress, project.tokenDecimal, tokenDecimal);
+                        response = responseUtil.error(RES_CODE.FAILED, 'token的decimal和实际的不一致==>实际的decimal=' + tokenDecimal);
                     }
                 } else {
-                    logger.warn('tokenDistribute() projectToken saved tokenDecimal mismatch with real tokenDecimal==>projectToken=%s; tokenAddress=%s; tokenDecimal=%s; realTokenDecimal=%s',
-                        project.projectToken, project.tokenAddress, project.tokenDecimal, tokenDecimal);
-                    response = responseUtil.error(RES_CODE.FAILED, 'token的decimal和实际的不一致==>实际的decimal=' + tokenDecimal);
+                    response = responseUtil.error(RES_CODE.AIRDROP_ADDRESS_AND_PLATFORM_ADDRESS_NOT_MATCH);
                 }
             } else {
                 response = responseUtil.error(RES_CODE.KEYSTORE_OR_PASSWORD_ERROR);
@@ -196,8 +201,12 @@ const execTokenDistribute = async (distributionBatchId, project, wallet, params,
                     let sysUserAddress = await SysUserAddress.findByUserGidAndProjectGid(userGid, project.projectGid);
                     let userReceiveAddress = sysUserAddress.getTokenAddress;
                     let value = bigDecimal.multiply(totalShouldGetAmount, Math.pow(10, tokenDecimal));
-                    let defaultTokenTransferGasLimit = Config.eth.default_token_transfer_gas_used;
+                    let defaultTokenTransferGasLimit = FixedConfig.eth.default_token_transfer_gas_used;
                     let defaultGasPrice = parseFloat(await ethersObj.provider.getGasPrice());
+                    if (FixedConfig.eth.max_gas_price && defaultGasPrice > FixedConfig.eth.max_gas_price) {
+                        //如果设置的最高gasPrice
+                        defaultGasPrice = FixedConfig.eth.max_gas_price;
+                    }
                     let nonce = await getNonce(projectPlatFormAddress);
                     //token转账
                     let result = await ethersObj.transferWithWallet(tokenAddress, wallet, userReceiveAddress, value, defaultTokenTransferGasLimit, defaultGasPrice, nonce);

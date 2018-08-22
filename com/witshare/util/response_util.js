@@ -47,13 +47,14 @@ const RES_CODE = {
     KEYSTORE_OR_PASSWORD_ERROR: ['1050', 'KeyStore和密码不匹配'],
     TOKEN_NOT_FOUND: ['1070', 'Token未找到'],
     WALLET_COUNT_TO_UPPER_LIMIT: ['1100', '您的钱包数量已达上限'],
-    SIGNATURE_AUTH_TOKEN_ERROR: ['1110', '接口签名验证错误'],
+    SIGNATURE_AUTH_TOKEN_ERROR: ['1101', '接口签名验证错误'],
+    AIRDROP_ADDRESS_AND_PLATFORM_ADDRESS_NOT_MATCH: ['1102', '打币地址和平台地址不匹配'],
 
     TRANSACTION_NOT_FOUND: ['1200', '交易未找到'],
     TRANSACTION_ALREADY_UPDATE_STATUS: ['1210', '该交易已经更新状态，无需重发'],
     TRANSACTION_ALREADY_EXECUTE: ['1220', '该交易已经执行，无需重发'],
     TRANSACTION_DISCARD: ['1230', '交易已作废，无法重发'],
-    TRANSACTION_FROM_NOT_MISMATCH: ['1240', '交易的发送方不匹配'],
+    TRANSACTION_FROM_NOT_MATCH: ['1240', '交易的发送方不匹配'],
     TRANSACTION_UNDER_PRICED: ['1240', '重发的交易gasPrice需要大于原先的'],
 };
 
