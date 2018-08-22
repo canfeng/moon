@@ -6,6 +6,7 @@ pathUtil.initConfigPath();
 const httpUtil = require('../../com/witshare/util/http_util');
 const redisUtil = require('../../com/witshare/util/redis_util');
 const redisKeyManager = require('../../com/witshare/common/redis_key_manager');
+const FixedConfig = require('../../conf/fixed_config');
 const log = require('../../com/witshare/logger').getLogger('home-ctrl-test');
 
 let host = 'http://localhost:3000/moon';
@@ -18,10 +19,10 @@ saveKeyStore().then(testTokenDistribute);
 
 async function testTokenDistribute() {
     let params = {
-        password: '',
+        password: FixedConfig.temp.airdroper.password,
         projectGid: '38b9ab6f15ca43e48870f8caeea016ac',
-        userTxStatusArr: [2],
-        platformTxStatusArr: [],
+        userTxStatusArr: [],
+        platformTxStatusArr: [0],
     };
     let headers;
     let res = await httpUtil.post(host + '/token/distribute', params, headers);
@@ -46,8 +47,9 @@ async function testTokenInfo() {
 }
 
 async function saveKeyStore() {
-    let address = '0x81A4962699F047C65baBee5E59f14a021F22A40A';
-    let keystore = '';
+    let owner = FixedConfig.temp.airdroper;
+    let address = owner.address;
+    let keystore = owner.keystore;
     let keyInfo = await redisKeyManager.getKeyPlatformProjectV3Json(address);
     redisUtil.set(keyInfo.key, keystore, 60 * 60);
 }

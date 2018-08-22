@@ -4,7 +4,7 @@ const ethersObj = require('../../com/witshare/eth/ethers_obj');
 const bigDecimal = require('js-big-decimal');
 
 
-createWallet();
+// generateWalletFromPrivateKey();
 // getReceipt();
 // getTransaction();
 // getTransaction();

@@ -24,5 +24,12 @@
     "default_token_transfer_gas_used": 60000,
     "transfer_gas_used_ratio": 1.2,
     "max_gas_price": 5000000000
+  },
+  "temp": {
+    "airdroper": {
+      "address": "",
+      "keystore": "",
+      "password": ""
+    }
   }
 }
